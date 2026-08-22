@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chris Kmelier — Developer Portfolio</title>
+    <meta
+      name="description"
+      content="Portfolio of Chris Kmelier (Kmelier) — tech enthusiast building useful, experimental and creative projects on the web and beyond."
+    />
+    <meta name="author" content="Chris Kmelier" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Chris Kmelier — Developer Portfolio" />
+    <meta
+      property="og:description"
+      content="Tech enthusiast building useful, experimental and creative projects. Projects, skills and GitHub activity, always in sync."
+    />
+    <meta property="og:image" content="https://avatars.githubusercontent.com/u/318184274?v=4" />
+    <meta property="og:url" content="https://kmelier.vercel.app" />
+    <meta property="og:site_name" content="Kmelier" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Chris Kmelier — Developer Portfolio" />
+    <meta
+      name="twitter:description"
+      content="Tech enthusiast building useful, experimental and creative projects. Projects, skills and GitHub activity, always in sync."
+    />
+    <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/318184274?v=4" />
+
+    <script>
+      // Apply theme before first paint: stored preference, else system preference, else dark.
+      (function () {
+        try {
+          var stored = localStorage.getItem("kmelier:theme");
+          var mql = window.matchMedia("(prefers-color-scheme: light)");
+          var dark = stored ? stored === "dark" : !mql.matches;
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          /* dark stays applied */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
