@@ -12,6 +12,7 @@
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
 }
 
 @theme {
@@ -19,17 +20,21 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* ── Theme tokens: light (warm off-white) ─────────────────────── */
+/* ── Theme tokens: light (cool slate / technical) ─────────────── */
 :root {
-  --bg: #faf9f6;
+  --bg: #f6f7f9;
   --surface: #ffffff;
-  --elevated: #f1f0ec;
-  --line: #e6e5df;
-  --fg: #18181b;
-  --muted: #52525b;
-  --faint: #8e8e96;
-  --accent: #5460f0;
-  --grid-line: rgb(0 0 0 / 0.05);
+  --elevated: #eef0f4;
+  --line: #e2e5ea;
+  --fg: #101116;
+  --muted: #4b5162;
+  --faint: #83899a;
+  --accent: #4f5ee8;
+  --accent-2: #7c5ce6;
+  --grid-line: rgb(15 23 42 / 0.05);
+  --shadow-card: 0 1px 2px rgb(16 17 22 / 0.05), 0 10px 28px -14px rgb(16 17 22 / 0.1);
+  --shadow-card-hover: 0 2px 6px rgb(16 17 22 / 0.06), 0 20px 44px -16px rgb(16 17 22 / 0.16);
+  --inner-highlight: inset 0 1px 0 rgb(255 255 255 / 0.85);
 }
 
 /* ── Theme tokens: dark (default, near-black) ─────────────────── */
@@ -42,7 +47,11 @@
   --muted: #a1a1aa;
   --faint: #6d6d76;
   --accent: #8b9dff;
+  --accent-2: #b79dff;
   --grid-line: rgb(255 255 255 / 0.04);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 14px 34px -16px rgb(0 0 0 / 0.55);
+  --shadow-card-hover: 0 2px 8px rgb(0 0 0 / 0.45), 0 24px 52px -18px rgb(0 0 0 / 0.65);
+  --inner-highlight: inset 0 1px 0 rgb(255 255 255 / 0.045);
 }
 
 @layer base {
@@ -70,6 +79,23 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Faint noise-grain texture over everything (adds depth, not color) */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
+  .dark body::after,
+  html.dark body::after {
+    opacity: 0.05;
+  }
+
   section[id] {
     scroll-margin-top: 4.5rem;
   }
@@ -84,7 +110,21 @@
   }
 }
 
-/* ── Smooth theme cross-fade (applied briefly during toggle) ──── */
+/* ── Theme transitions ──────────────────────────────────────────
+   Primary: circular reveal via the View Transitions API (driven in
+   useTheme). Fallback: brief cross-fade of themed properties.     */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2147483647;
+}
+
 html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
@@ -107,16 +147,45 @@ html.theme-transition *::after {
   mask-image: radial-gradient(ellipse 85% 65% at 50% 32%, black 25%, transparent 78%);
 }
 
-/* ── Card hover glow (used with hover:-translate-y-1) ─────────── */
+/* ── Gradient accent text (indigo → violet) ───────────────────── */
+.text-gradient {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Gradient border for the featured project card ────────────── */
+.gradient-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--accent) 55%, transparent),
+      color-mix(in oklab, var(--accent-2) 45%, transparent)
+    ) border-box;
+}
+
+/* ── Cards: resting shadow + inner top highlight, deeper on hover ── */
 .card-glow {
   transition:
     transform 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease;
+  box-shadow: var(--shadow-card), var(--inner-highlight);
 }
 .card-glow:hover {
   border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
-  box-shadow: 0 10px 44px -14px color-mix(in oklab, var(--accent) 24%, transparent);
+  box-shadow:
+    var(--shadow-card-hover),
+    var(--inner-highlight),
+    0 10px 44px -14px color-mix(in oklab, var(--accent) 22%, transparent);
+}
+
+/* Inner highlight for small flat tiles */
+.tile {
+  box-shadow: var(--inner-highlight);
 }
 
 /* ── Skeleton shimmer ─────────────────────────────────────────── */

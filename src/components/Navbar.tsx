@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { animate, stagger } from "animejs";
+import { Moon, Sun } from "lucide-react";
 import { iconPop } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme } from "../hooks/useTheme";
@@ -15,16 +16,44 @@ const NAV_ITEMS = [
   { id: "contact", label: "Contact" },
 ] as const;
 
+/** Three bars that morph into an X. */
+function HamburgerIcon({ open }: { open: boolean }) {
+  return (
+    <span aria-hidden className="relative block h-4 w-5">
+      <span
+        className={`absolute left-0 top-0 h-[1.5px] w-full rounded-full bg-current transition-transform duration-300 ease-out ${
+          open ? "translate-y-[7.5px] rotate-45" : ""
+        }`}
+      />
+      <span
+        className={`absolute left-0 top-[7.5px] h-[1.5px] w-full rounded-full bg-current transition-opacity duration-200 ${
+          open ? "opacity-0" : "opacity-100"
+        }`}
+      />
+      <span
+        className={`absolute left-0 top-[15px] h-[1.5px] w-full rounded-full bg-current transition-transform duration-300 ease-out ${
+          open ? "-translate-y-[7.5px] -rotate-45" : ""
+        }`}
+      />
+    </span>
+  );
+}
+
 interface NavbarProps {
   theme: Theme;
-  onToggleTheme: () => void;
+  onToggleTheme: (origin?: { x: number; y: number }) => void;
 }
 
 export function Navbar({ theme, onToggleTheme }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuMounted, setMenuMounted] = useState(false);
   const reduced = useReducedMotion();
+
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const indicatorRef = useRef<HTMLSpanElement | null>(null);
+  const menuRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -51,6 +80,46 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
     return () => io.disconnect();
   }, []);
 
+  // Sliding gradient indicator under the active nav link
+  useEffect(() => {
+    const indicator = indicatorRef.current;
+    if (!indicator) return;
+    const idx = NAV_ITEMS.findIndex((i) => i.id === active);
+    const link = idx >= 0 ? linkRefs.current[idx] : null;
+    if (!link) {
+      if (!reduced) animate(indicator, { opacity: 0, duration: 200 });
+      return;
+    }
+    if (reduced) {
+      indicator.style.left = `${link.offsetLeft}px`;
+      indicator.style.width = `${link.offsetWidth}px`;
+      indicator.style.opacity = "1";
+      return;
+    }
+    animate(indicator, {
+      left: link.offsetLeft,
+      width: link.offsetWidth,
+      opacity: 1,
+      duration: 400,
+      ease: "outExpo",
+    });
+  }, [active, reduced]);
+
+  // Keep the indicator glued to its link across resizes
+  useEffect(() => {
+    const onResize = () => {
+      const indicator = indicatorRef.current;
+      const idx = NAV_ITEMS.findIndex((i) => i.id === active);
+      const link = idx >= 0 ? linkRefs.current[idx] : null;
+      if (indicator && link) {
+        indicator.style.left = `${link.offsetLeft}px`;
+        indicator.style.width = `${link.offsetWidth}px`;
+      }
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [active]);
+
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -59,6 +128,47 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
+
+  // Mobile menu lifecycle: open → mount + animate in; close → animate out → unmount
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuMounted(true);
+      return;
+    }
+    const nav = menuRef.current;
+    if (!menuMounted || !nav) return;
+    if (reduced) {
+      setMenuMounted(false);
+      return;
+    }
+    animate(nav, {
+      opacity: [1, 0],
+      translateY: [0, -8],
+      duration: 220,
+      ease: "inQuad",
+      onComplete: () => setMenuMounted(false),
+    });
+  }, [menuOpen, menuMounted, reduced]);
+
+  // Runs after the mounted nav actually exists
+  useEffect(() => {
+    if (!menuOpen || !menuMounted) return;
+    const nav = menuRef.current;
+    if (!nav || reduced) return;
+    animate(nav, {
+      opacity: [0, 1],
+      translateY: [-10, 0],
+      duration: 320,
+      ease: "outExpo",
+    });
+    animate(nav.querySelectorAll("a"), {
+      opacity: [0, 1],
+      translateX: [-12, 0],
+      duration: 380,
+      ease: "outExpo",
+      delay: stagger(45, { start: 60 }),
+    });
+  }, [menuOpen, menuMounted, reduced]);
 
   return (
     <header
@@ -80,11 +190,14 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
           Kmelier<span className="text-accent">.</span>
         </a>
 
-        {/* Desktop navigation */}
-        <ul className="hidden items-center gap-7 md:flex">
-          {NAV_ITEMS.map((item) => (
+        {/* Desktop navigation with sliding indicator */}
+        <ul className="relative hidden items-center gap-7 md:flex">
+          {NAV_ITEMS.map((item, i) => (
             <li key={item.id}>
               <a
+                ref={(el) => {
+                  linkRefs.current[i] = el;
+                }}
                 href={`#${item.id}`}
                 aria-current={active === item.id ? "location" : undefined}
                 className={`text-sm transition-colors ${
@@ -97,6 +210,12 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
               </a>
             </li>
           ))}
+          <span
+            ref={indicatorRef}
+            aria-hidden
+            className="absolute -bottom-[9px] left-0 h-[2px] rounded-full bg-gradient-to-r from-accent to-accent-2"
+            style={{ width: 0, opacity: 0 }}
+          />
         </ul>
 
         <div className="flex items-center gap-2">
@@ -112,8 +231,8 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
 
           <button
             type="button"
-            onClick={() => {
-              onToggleTheme();
+            onClick={(e) => {
+              onToggleTheme({ x: e.clientX, y: e.clientY });
               iconPop(document.getElementById("theme-icon"), reduced);
             }}
             aria-label={
@@ -139,18 +258,19 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             className="rounded-lg border border-line bg-surface/50 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg md:hidden"
           >
-            {menuOpen ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <Menu className="h-4 w-4" />
-            )}
+            <HamburgerIcon open={menuOpen} />
           </button>
         </div>
       </nav>
 
-      {/* Mobile navigation */}
-      {menuOpen && (
-        <nav id="mobile-nav" aria-label="Mobile" className="md:hidden">
+      {/* Mobile navigation (animated) */}
+      {menuMounted && (
+        <nav
+          id="mobile-nav"
+          ref={menuRef}
+          aria-label="Mobile"
+          className={`md:hidden ${reduced ? "" : "opacity-0"}`}
+        >
           <ul className="space-y-1 border-t border-line px-6 py-4">
             {NAV_ITEMS.map((item) => (
               <li key={item.id}>

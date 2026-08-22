@@ -52,7 +52,7 @@ function Stat({
   return (
     <div
       ref={ref}
-      className="rounded-xl border border-line bg-elevated px-4 py-4 text-center"
+      className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
     >
       <span
         ref={valueRef}
@@ -87,11 +87,20 @@ export function GithubSection({ github }: { github: GithubData }) {
         sub="Live from the GitHub API — repositories, stats, and what I've been up to."
       />
 
-      <div className="mt-14">
+      <div className="relative mt-14">
+        {/* Aurora glows behind the section content */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-4 left-1/2 h-[320px] w-[660px] -translate-x-1/2 rounded-full bg-accent/[0.05] blur-[110px] dark:bg-accent/[0.08]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-20 h-[260px] w-[380px] rounded-full bg-accent-2/[0.04] blur-[100px] dark:bg-accent-2/[0.07]"
+        />
         {data ? (
-          <div ref={ref}>
+          <div ref={ref} className="relative">
             <div
-              className={`flex flex-col items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:items-center ${
+              className={`card-glow flex flex-col items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:items-center ${
                 inView ? "" : "opacity-0"
               }`}
             >
@@ -158,7 +167,7 @@ export function GithubSection({ github }: { github: GithubData }) {
 
             {activity.length > 0 && (
               <div
-                className={`mt-4 rounded-2xl border border-line bg-surface p-6 ${
+                className={`card-glow mt-4 rounded-2xl border border-line bg-surface p-6 ${
                   inView ? "" : "opacity-0"
                 }`}
               >

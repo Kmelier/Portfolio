@@ -5,7 +5,7 @@ import { GithubIcon } from "./icons";
 
 interface FooterProps {
   theme: Theme;
-  onToggleTheme: () => void;
+  onToggleTheme: (origin?: { x: number; y: number }) => void;
 }
 
 export function Footer({ theme, onToggleTheme }: FooterProps) {
@@ -37,7 +37,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
           )}
           <button
             type="button"
-            onClick={onToggleTheme}
+            onClick={(e) => onToggleTheme({ x: e.clientX, y: e.clientY })}
             aria-label={
               theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
             }

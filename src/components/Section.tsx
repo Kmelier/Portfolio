@@ -23,7 +23,7 @@ export function SectionHeading({ kicker, title, sub }: SectionHeadingProps) {
       ref={ref}
       className={`mx-auto max-w-2xl text-center ${inView ? "" : "opacity-0"}`}
     >
-      <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+      <p className="text-gradient font-mono text-xs font-medium uppercase tracking-[0.2em]">
         {kicker}
       </p>
       <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -46,7 +46,7 @@ export function Section({
   return (
     <section
       id={id}
-      className={`mx-auto max-w-6xl px-6 py-24 sm:py-28 ${className}`}
+      className={`relative mx-auto max-w-6xl px-6 py-24 sm:py-28 ${className}`}
     >
       {children}
     </section>

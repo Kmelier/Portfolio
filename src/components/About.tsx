@@ -35,7 +35,7 @@ export function About() {
         className="mt-2 grid gap-12 md:grid-cols-[1.25fr_1fr] md:gap-16"
       >
         <div className={inView ? "" : "opacity-0"}>
-          <p className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-accent">
+          <p className="text-gradient font-mono text-xs font-medium uppercase tracking-[0.2em]">
             About
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -56,7 +56,7 @@ export function About() {
         </div>
 
         <div
-          className={`h-fit rounded-2xl border border-line bg-surface p-6 ${
+          className={`card-glow h-fit rounded-2xl border border-line bg-surface p-6 ${
             inView ? "" : "opacity-0"
           }`}
         >

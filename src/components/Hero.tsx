@@ -37,7 +37,11 @@ export function Hero() {
       <div aria-hidden className="bg-grid absolute inset-0" />
       <div
         aria-hidden
-        className="absolute left-1/2 top-[-240px] h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-accent/[0.09] blur-[130px]"
+        className="absolute left-1/2 top-[-240px] h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-accent/[0.07] blur-[130px] dark:bg-accent/[0.12]"
+      />
+      <div
+        aria-hidden
+        className="absolute right-[4%] top-[40px] h-[380px] w-[480px] rounded-full bg-accent-2/[0.05] blur-[110px] dark:bg-accent-2/[0.09]"
       />
       <span
         aria-hidden
@@ -82,7 +86,7 @@ export function Hero() {
       <div className="relative mx-auto max-w-3xl px-6 pb-28 pt-28 text-center sm:pt-36">
         <p
           ref={labelRef}
-          className={`font-mono text-xs font-medium uppercase tracking-[0.25em] text-accent ${
+          className={`text-gradient font-mono text-xs font-medium uppercase tracking-[0.25em] ${
             reduced ? "" : "opacity-0"
           }`}
         >
@@ -94,7 +98,8 @@ export function Hero() {
             reduced ? "" : "opacity-0"
           }`}
         >
-          {profile.tagline}
+          I build things on{" "}
+          <span className="text-gradient">the web and beyond</span>.
         </h1>
         <p
           ref={subRef}

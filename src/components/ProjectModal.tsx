@@ -107,7 +107,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-accent">
+            <p className="text-gradient font-mono text-xs uppercase tracking-[0.2em]">
               {project.featured ? "Featured project" : "Project"}
             </p>
             <h3
@@ -158,7 +158,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
           {meta.map((item) => (
             <div
               key={item.label}
-              className="rounded-xl border border-line bg-elevated px-3.5 py-3"
+              className="tile rounded-xl border border-line bg-elevated px-3.5 py-3"
             >
               <dt className="font-mono text-[10px] uppercase tracking-wider text-faint">
                 {item.label}

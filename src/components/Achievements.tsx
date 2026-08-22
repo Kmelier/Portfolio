@@ -19,7 +19,7 @@ function Counter({ label, value }: { label: string; value: number }) {
   return (
     <div
       ref={ref}
-      className="rounded-2xl border border-line bg-surface px-6 py-8 text-center"
+      className="card-glow rounded-2xl border border-line bg-surface px-6 py-8 text-center"
     >
       <span
         ref={valueRef}
