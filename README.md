@@ -55,3 +55,12 @@ Every future `git push` redeploys automatically.
 
 - **Rate limits** — unauthenticated GitHub API allows 60 requests/hour per visitor IP; the 10-minute cache keeps a personal site far below that. If traffic ever grows, add a tiny serverless proxy with a token.
 - **No backend, no tracking** — everything runs client-side; fonts are self-hosted.
+
+## Security
+
+The site is fully static — no backend, no forms, no auth, no secrets in the repo. Hardening in place:
+
+- **Content-Security-Policy** injected into the production build (`vite.config.ts`): scripts/styles/fonts only from `self`, images additionally from `avatars.githubusercontent.com`, network fetches only to `api.github.com`, no objects, no form submissions, no inline scripts (the theme bootstrap lives in `public/theme-init.js`, and the build fails if an inline `<script>` sneaks in). Dev mode is unaffected — the CSP applies to builds only.
+- **Host headers** (`vercel.json`): `frame-ancestors 'none'` + `X-Frame-Options: DENY` (clickjacking), HSTS with preload, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy` (camera/mic/geo/payment/usb denied), COOP/CORP `same-origin`.
+- **Untrusted-data guards** — everything rendered from the GitHub API is React-escaped text; repo `homepage` URLs pass a `safeHttpUrl()` http(s)-only check before becoming links; the localStorage cache is shape-validated before use; all API fetches have 8s timeouts. All external links use `rel="noreferrer noopener"`.
+- **Supply chain** — `npm audit` clean at time of writing; Dependabot opens weekly dependency PRs (`.github/dependabot.yml`).

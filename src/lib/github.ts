@@ -69,7 +69,12 @@ export function readCache(): GithubSnapshot | null {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as GithubSnapshot;
-    if (parsed?.user?.login && Array.isArray(parsed.repos)) return parsed;
+    const wellFormed =
+      parsed?.user?.login &&
+      typeof parsed.fetchedAt === "number" &&
+      Array.isArray(parsed.repos) &&
+      Array.isArray(parsed.events);
+    if (wellFormed) return parsed;
   } catch {
     /* corrupted cache is treated as absent */
   }
@@ -80,12 +85,15 @@ export function isFresh(snapshot: GithubSnapshot): boolean {
   return Date.now() - snapshot.fetchedAt < CACHE_TTL;
 }
 
+const REQUEST_TIMEOUT_MS = 8000;
+
 async function gh<T>(path: string): Promise<T> {
   const res = await fetch(`https://api.github.com${path}`, {
     headers: {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`GitHub API responded ${res.status}`);
   return (await res.json()) as T;

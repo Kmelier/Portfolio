@@ -39,22 +39,7 @@
     />
     <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/318184274?v=4" />
 
-    <script>
-      // Apply theme before first paint: stored preference, else system preference, else dark.
-      (function () {
-        try {
-          var stored = localStorage.getItem("kmelier:theme");
-          var mql = window.matchMedia("(prefers-color-scheme: light)");
-          var dark = stored ? stored === "dark" : !mql.matches;
-          document.documentElement.classList.toggle("dark", dark);
-          document.documentElement.style.colorScheme = dark ? "dark" : "light";
-          var themeMeta = document.querySelector('meta[name="theme-color"]');
-          if (themeMeta) themeMeta.setAttribute("content", dark ? "#0a0a0c" : "#f4f4fa");
-        } catch (e) {
-          /* dark stays applied */
-        }
-      })();
-    </script>
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>

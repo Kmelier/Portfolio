@@ -6,7 +6,10 @@ export async function fetchReadme(repo: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://api.github.com/repos/${profile.username}/${repo}/readme`,
-      { headers: { Accept: "application/vnd.github.raw" } },
+      {
+        headers: { Accept: "application/vnd.github.raw" },
+        signal: AbortSignal.timeout(8000),
+      },
     );
     if (!res.ok) return null;
     return await res.text();

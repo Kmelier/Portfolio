@@ -1,6 +1,7 @@
 import { ArrowUpRight, ExternalLink, GitFork, Star } from "lucide-react";
 import { languageColor, timeAgo } from "../lib/format";
 import type { Project } from "../lib/github";
+import { safeHttpUrl } from "../lib/url";
 import { GithubIcon } from "./icons";
 
 interface ProjectCardProps {
@@ -10,6 +11,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onOpen }: ProjectCardProps) {
   const tags = project.topics.slice(0, 3);
+  const liveUrl = safeHttpUrl(project.homepage);
 
   return (
     <article
@@ -22,9 +24,9 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
           <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </span>
         <div className="relative z-10 flex items-center gap-2">
-          {project.homepage && (
+          {liveUrl && (
             <a
-              href={project.homepage}
+              href={liveUrl}
               target="_blank"
               rel="noreferrer noopener"
               aria-label={`Live demo of ${project.name} (opens in a new tab)`}

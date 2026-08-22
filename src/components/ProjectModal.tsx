@@ -6,6 +6,7 @@ import { fetchReadme, readmeToPlainText } from "../lib/readme";
 import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { safeHttpUrl } from "../lib/url";
 import { GithubIcon } from "./icons";
 
 interface ProjectModalProps {
@@ -87,6 +88,8 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   }, [project?.name]);
 
   if (!project) return null;
+
+  const liveUrl = safeHttpUrl(project.homepage);
 
   const requestClose = () => {
     modalOut(backdropRef.current, panelRef.current, reduced, () => {
@@ -202,9 +205,9 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             <GithubIcon className="h-4 w-4" />
             View on GitHub
           </a>
-          {project.homepage && (
+          {liveUrl && (
             <a
-              href={project.homepage}
+              href={liveUrl}
               target="_blank"
               rel="noreferrer noopener"
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-line px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50"
