@@ -299,3 +299,45 @@ export function iconPop(el: HTMLElement | null, reduced: boolean): void {
     ease: springHover(),
   });
 }
+
+/** One-shot celebration burst (easter egg): dots + code glyphs from the hero. */
+export function particleBurst(reduced: boolean): void {
+  if (reduced) return;
+  const layer = document.createElement("div");
+  layer.style.cssText = "position:fixed;inset:0;z-index:120;pointer-events:none;";
+  document.body.appendChild(layer);
+
+  const glyphs = ["</>", "{ }", "git", "λ", "#", "K", "→", "*"];
+  const colors = ["var(--accent)", "var(--accent-2)", "var(--fg)"];
+
+  for (let i = 0; i < 42; i++) {
+    const el = document.createElement("span");
+    const isDot = Math.random() < 0.6;
+    el.textContent = isDot
+      ? "●"
+      : glyphs[Math.floor(Math.random() * glyphs.length)];
+    el.style.cssText = [
+      "position:absolute",
+      "left:50%",
+      "top:42%",
+      `font-family:var(--font-mono)`,
+      `font-size:${isDot ? 8 + Math.random() * 8 : 12 + Math.random() * 8}px`,
+      `color:${colors[Math.floor(Math.random() * colors.length)]}`,
+    ].join(";");
+    layer.appendChild(el);
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 90 + Math.random() * 260;
+    animate(el, {
+      translateX: Math.cos(angle) * distance,
+      translateY: Math.sin(angle) * distance - 40,
+      rotate: (Math.random() - 0.5) * 220,
+      scale: [0, 1, 0.9],
+      opacity: [1, 1, 0],
+      duration: 900 + Math.random() * 500,
+      ease: "outExpo",
+      delay: Math.random() * 120,
+    });
+  }
+  window.setTimeout(() => layer.remove(), 1800);
+}

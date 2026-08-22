@@ -43,6 +43,15 @@ export function Hero() {
   const primaryRef = useRef<HTMLAnchorElement | null>(null);
   const buttonRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const floatRefs = useRef<(HTMLElement | null)[]>([]);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  // Honest, time-aware greeting from the visitor's clock
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  })();
 
   useEffect(() => {
     const words = Array.from(
@@ -65,6 +74,31 @@ export function Hero() {
     const primary = primaryRef.current;
     return primary ? attachMagnetic(primary) : undefined;
   }, []);
+
+  // Scroll parallax: hero content drifts up slower and fades as you leave it
+  useEffect(() => {
+    if (reduced) return;
+    let raf = 0;
+    const apply = () => {
+      raf = 0;
+      const el = contentRef.current;
+      if (!el) return;
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+      if (y > vh) return;
+      const progress = Math.min(1, y / vh);
+      el.style.transform = `translateY(${(y * 0.28).toFixed(1)}px)`;
+      el.style.opacity = String(1 - progress * 0.9);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(apply);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reduced]);
 
   return (
     <section id="home" className="relative overflow-hidden">
@@ -118,14 +152,17 @@ export function Hero() {
         className="absolute left-[47%] top-[22%] hidden h-1 w-1 rounded-full bg-accent/40 sm:block"
       />
 
-      <div className="relative mx-auto max-w-3xl px-6 pb-28 pt-28 text-center sm:pt-36">
+      <div
+        ref={contentRef}
+        className="relative mx-auto max-w-3xl px-6 pb-28 pt-28 text-center sm:pt-36"
+      >
         <p
           ref={labelRef}
           className={`text-gradient inline-flex items-center font-mono text-xs font-medium uppercase tracking-[0.25em] ${
             reduced ? "" : "opacity-0"
           }`}
         >
-          Hello, I'm Kmelier
+          {greeting}, I'm Kmelier
           <span
             ref={caretRef}
             aria-hidden

@@ -1,19 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { animate, stagger } from "animejs";
+import { Search } from "lucide-react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { profile } from "../config/profile";
+import { NAV_ITEMS } from "../config/navigation";
 import { ThemeToggleButton, iconButtonClass } from "./ThemeToggle";
 import { GithubIcon } from "./icons";
-
-const NAV_ITEMS = [
-  { id: "home", label: "Home" },
-  { id: "about", label: "About" },
-  { id: "projects", label: "Projects" },
-  { id: "skills", label: "Skills" },
-  { id: "github", label: "GitHub" },
-  { id: "contact", label: "Contact" },
-] as const;
 
 /** Three bars that morph into an X. */
 function HamburgerIcon({ open }: { open: boolean }) {
@@ -41,9 +34,10 @@ function HamburgerIcon({ open }: { open: boolean }) {
 interface NavbarProps {
   theme: Theme;
   onToggleTheme: (origin?: ThemeOrigin) => void;
+  onOpenPalette: () => void;
 }
 
-export function Navbar({ theme, onToggleTheme }: NavbarProps) {
+export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -221,6 +215,20 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
         </ul>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            data-spring
+            onClick={onOpenPalette}
+            aria-label="Open command palette"
+            aria-keyshortcuts="Control+K"
+            className={`${iconButtonClass} inline-flex items-center gap-2`}
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden font-mono text-[10px] text-faint md:inline">
+              ⌘K
+            </span>
+          </button>
+
           <a
             href={profile.social.github}
             target="_blank"

@@ -6,10 +6,10 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
+import { useMemo } from "react";
 import type { GithubData } from "../hooks/useGithubData";
 import { useReveal } from "../hooks/useReveal";
-import { timeAgo } from "../lib/format";
-import {
+import { timeAgo } from "../lib/format";import {
   describeEvents,
   totalStars,
   type ActivityItem,
@@ -29,12 +29,60 @@ const ACTIVITY_ICONS: Record<ActivityItem["kind"], LucideIcon> = {
   issue: GitPullRequest,
 };
 
+const HEATMAP_WEEKS = 12;
+const HEATMAP_LEVELS = [
+  "bg-elevated",
+  "bg-accent/25",
+  "bg-accent/50",
+  "bg-accent/80",
+];
+
+interface HeatmapCell {
+  key: string;
+  level: number;
+  title: string;
+}
+
+/** Last N weeks of event counts as week-columns — real data only. */
+function buildHeatmap(events: { created_at: string }[]): HeatmapCell[][] {
+  const counts = new Map<string, number>();
+  for (const ev of events) {
+    const d = new Date(ev.created_at);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const weeks: HeatmapCell[][] = [];
+  const today = new Date();
+  for (let w = 0; w < HEATMAP_WEEKS; w++) {
+    const week: HeatmapCell[] = [];
+    for (let day = 6; day >= 0; day--) {
+      const offset = (HEATMAP_WEEKS - 1 - w) * 7 + day;
+      const d = new Date(today);
+      d.setDate(today.getDate() - offset);
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const count = counts.get(key) ?? 0;
+      const level = count >= 5 ? 3 : count >= 3 ? 2 : count >= 1 ? 1 : 0;
+      week.push({
+        key,
+        level,
+        title: `${d.toLocaleDateString()} — ${count} event${count === 1 ? "" : "s"}`,
+      });
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
 export function GithubSection({ github }: { github: GithubData }) {
   const { status, data } = github;
   const { ref, revealClass } = useReveal<HTMLDivElement>();
 
   const stars = data ? totalStars(data.repos) : 0;
   const activity = data ? describeEvents(data.events).slice(0, 5) : [];
+  const heatmap = useMemo(
+    () => (data && data.events.length > 0 ? buildHeatmap(data.events) : []),
+    [data],
+  );
 
   return (
     <Section id="github">
@@ -151,6 +199,32 @@ export function GithubSection({ github }: { github: GithubData }) {
                     );
                   })}
                 </ul>
+              </div>
+            )}
+
+            {heatmap.length > 0 && (
+              <div
+                className={`card-glow mt-4 rounded-2xl border border-line bg-surface p-6 ${revealClass}`}
+              >
+                <h3 className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-faint">
+                  Last {HEATMAP_WEEKS} weeks
+                </h3>
+                <div className="mt-4 flex gap-[3px] overflow-x-auto">
+                  {heatmap.map((week, wi) => (
+                    <div key={wi} className="flex flex-col gap-[3px]">
+                      {week.map((cell) => (
+                        <span
+                          key={cell.key}
+                          title={cell.title}
+                          className={`h-2.5 w-2.5 shrink-0 rounded-[3px] ${HEATMAP_LEVELS[cell.level]}`}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 font-mono text-[11px] text-faint">
+                  Live from the events API — fills in as GitHub is used.
+                </p>
               </div>
             )}
           </div>
