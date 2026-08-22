@@ -64,6 +64,10 @@
   }
 
   html {
+    /* Fluid scale: the whole UI (rem-based sizes + spacing) gently
+       grows with the viewport — ~14px on phones, ~16px at 1440px,
+       capped at 17px on large displays. */
+    font-size: clamp(14px, 0.22vw + 12.7px, 17px);
     scroll-behavior: smooth;
   }
 
