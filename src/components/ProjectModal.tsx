@@ -99,24 +99,29 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   const liveUrl = safeHttpUrl(project.homepage);
 
-  const meta: { label: string; value: string }[] = [
-    project.language
-      ? { label: "Language", value: project.language }
-      : { label: "Language", value: "—" },
-    { label: "Stars", value: String(project.stargazers_count) },
-    { label: "Forks", value: String(project.forks_count) },
-    { label: "Updated", value: timeAgo(project.pushed_at) },
-    {
-      label: "Created",
-      value: new Date(project.created_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-      }),
-    },
-    project.license?.spdx_id && project.license.spdx_id !== "NOASSERTION"
-      ? { label: "License", value: project.license.spdx_id }
-      : { label: "License", value: "None" },
-  ];
+  // Only meaningful values get tiles — zero/None stats stay hidden
+  // until they're real (same philosophy as the site's other stats).
+  const meta: { label: string; value: string }[] = [];
+  if (project.language) {
+    meta.push({ label: "Language", value: project.language });
+  }
+  if (project.stargazers_count > 0) {
+    meta.push({ label: "Stars", value: String(project.stargazers_count) });
+  }
+  if (project.forks_count > 0) {
+    meta.push({ label: "Forks", value: String(project.forks_count) });
+  }
+  meta.push({ label: "Updated", value: timeAgo(project.pushed_at) });
+  meta.push({
+    label: "Created",
+    value: new Date(project.created_at).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+    }),
+  });
+  if (project.license?.spdx_id && project.license.spdx_id !== "NOASSERTION") {
+    meta.push({ label: "License", value: project.license.spdx_id });
+  }
 
   return (
     <div
@@ -131,7 +136,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
-        className="card-glow max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-surface p-6 shadow-2xl sm:rounded-2xl sm:p-8"
+        className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-surface p-6 shadow-2xl sm:rounded-2xl sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
