@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { ExternalLink, X } from "lucide-react";
 import { languageColor, timeAgo } from "../lib/format";
 import { fetchReadme, parseReadme, type ReadmeBlock } from "../lib/readme";
@@ -232,10 +233,13 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     meta.push({ label: "License", value: project.license.spdx_id });
   }
 
-  return (
+  // Portaled to <body>: the modal lives inside a content-visibility
+  // section, whose paint containment would otherwise turn the
+  // "fullscreen" fixed overlay into a section-sized one.
+  return createPortal(
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 p-0 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 backdrop-blur-md sm:items-center sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
@@ -360,6 +364,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
