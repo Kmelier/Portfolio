@@ -61,7 +61,7 @@ function TechGlyph({ name }: { name: string }) {
 }
 
 export function Skills() {
-  const { ref, inView } = useReveal<HTMLDivElement>();
+  const { ref, revealClass } = useReveal<HTMLDivElement>();
 
   return (
     <Section id="skills">
@@ -76,9 +76,7 @@ export function Skills() {
           return (
             <div
               key={category.title}
-              className={`card-glow rounded-2xl border border-line bg-surface p-6 ${
-                inView ? "" : "opacity-0"
-              }`}
+              className={`card-glow rounded-2xl border border-line bg-surface p-6 ${revealClass}`}
             >
               <div className="flex items-center gap-3">
                 <span className="rounded-lg border border-line bg-elevated p-2 text-accent">

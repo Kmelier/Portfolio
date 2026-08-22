@@ -31,7 +31,7 @@ const ACTIVITY_ICONS: Record<ActivityItem["kind"], LucideIcon> = {
 
 export function GithubSection({ github }: { github: GithubData }) {
   const { status, data } = github;
-  const { ref, inView } = useReveal<HTMLDivElement>();
+  const { ref, revealClass } = useReveal<HTMLDivElement>();
 
   const stars = data ? totalStars(data.repos) : 0;
   const activity = data ? describeEvents(data.events).slice(0, 5) : [];
@@ -57,9 +57,7 @@ export function GithubSection({ github }: { github: GithubData }) {
         {data ? (
           <div ref={ref} className="relative">
             <div
-              className={`card-glow flex flex-col items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:items-center ${
-                inView ? "" : "opacity-0"
-              }`}
+              className={`card-glow flex flex-col items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:items-center ${revealClass}`}
             >
               <img
                 src={data.user.avatar_url}
@@ -96,9 +94,7 @@ export function GithubSection({ github }: { github: GithubData }) {
             </div>
 
             <div
-              className={`mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 ${
-                inView ? "" : "opacity-0"
-              }`}
+              className={`mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 ${revealClass}`}
             >
               <StatTile
                 label="Public repositories"
@@ -120,9 +116,7 @@ export function GithubSection({ github }: { github: GithubData }) {
 
             {activity.length > 0 && (
               <div
-                className={`card-glow mt-4 rounded-2xl border border-line bg-surface p-6 ${
-                  inView ? "" : "opacity-0"
-                }`}
+                className={`card-glow mt-4 rounded-2xl border border-line bg-surface p-6 ${revealClass}`}
               >
                 <h3 className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-faint">
                   Recent activity

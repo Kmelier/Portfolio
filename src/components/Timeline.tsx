@@ -3,7 +3,7 @@ import { Section, SectionHeading } from "./Section";
 import { useReveal } from "../hooks/useReveal";
 
 export function Timeline() {
-  const { ref, inView } = useReveal<HTMLOListElement>();
+  const { ref, revealClass } = useReveal<HTMLOListElement>();
 
   return (
     <Section id="journey">
@@ -20,7 +20,7 @@ export function Timeline() {
         {timeline.map((entry, i) => (
           <li
             key={entry.period}
-            className={`relative pl-8 ${inView ? "" : "opacity-0"}`}
+            className={`relative pl-8 ${revealClass}`}
           >
             <span
               aria-hidden

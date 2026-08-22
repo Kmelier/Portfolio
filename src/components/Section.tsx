@@ -9,12 +9,12 @@ interface SectionHeadingProps {
 
 /** Centered section heading with mono kicker, revealed on scroll. */
 export function SectionHeading({ kicker, title, sub }: SectionHeadingProps) {
-  const { ref, inView } = useReveal<HTMLDivElement>();
+  const { ref, revealClass } = useReveal<HTMLDivElement>();
 
   return (
     <div
       ref={ref}
-      className={`mx-auto max-w-2xl text-center ${inView ? "" : "opacity-0"}`}
+      className={`mx-auto max-w-2xl text-center ${revealClass}`}
     >
       <p className="text-gradient font-mono text-xs font-medium uppercase tracking-[0.2em]">
         {kicker}
