@@ -1,7 +1,5 @@
-import { useEffect, type ReactNode } from "react";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { reveal } from "../lib/animations";
+import type { ReactNode } from "react";
+import { useReveal } from "../hooks/useReveal";
 
 interface SectionHeadingProps {
   kicker: string;
@@ -11,12 +9,7 @@ interface SectionHeadingProps {
 
 /** Centered section heading with mono kicker, revealed on scroll. */
 export function SectionHeading({ kicker, title, sub }: SectionHeadingProps) {
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLDivElement>();
-
-  useEffect(() => {
-    if (inView && ref.current) reveal(ref.current, reduced);
-  }, [inView, reduced, ref]);
+  const { ref, inView } = useReveal<HTMLDivElement>();
 
   return (
     <div

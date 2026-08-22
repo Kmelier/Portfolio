@@ -14,8 +14,8 @@ export const profile = {
 
   /** One-line intro used in the About section. */
   bio: "Tech enthusiast. I like contributing to random projects.",
-  /** Hero heading. */
-  tagline: "I build things on the web and beyond.",
+  /** Hero heading — {braces} mark the gradient-highlighted words. */
+  tagline: "I build things on {the web and beyond}.",
 
   // Optional About-panel fields — fill in to show them:
   location: "",
@@ -33,5 +33,3 @@ export const profile = {
     discord: "", // e.g. "https://discord.com/users/your-id"
   },
 } as const;
-
-export type Profile = typeof profile;

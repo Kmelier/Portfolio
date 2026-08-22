@@ -1,5 +1,6 @@
-import { ArrowUpRight, GitFork, Star } from "lucide-react";
-import { languageColor, timeAgo, type Project } from "../lib/github";
+import { ArrowUpRight, ExternalLink, GitFork, Star } from "lucide-react";
+import { languageColor, timeAgo } from "../lib/format";
+import type { Project } from "../lib/github";
 import { GithubIcon } from "./icons";
 
 interface ProjectCardProps {
@@ -20,32 +21,19 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
         <span className="rounded-lg border border-line bg-elevated p-2 text-faint transition-colors group-hover:text-accent">
           <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </span>
-        <div className="relative z-10 flex items-center gap-1">
-          <a
-            href={project.homepage || undefined}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label={`Live demo of ${project.name} (opens in a new tab)`}
-            className={`rounded-md p-1.5 text-faint transition-colors hover:bg-elevated hover:text-fg ${
-              project.homepage ? "" : "pointer-events-none opacity-0"
-            }`}
-            tabIndex={project.homepage ? 0 : -1}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-              aria-hidden="true"
+        <div className="relative z-10 flex items-center gap-2">
+          {project.homepage && (
+            <a
+              href={project.homepage}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label={`Live demo of ${project.name} (opens in a new tab)`}
+              className="inline-flex items-center gap-1 rounded-md border border-line bg-elevated px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-accent/40 hover:text-fg"
             >
-              <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" />
-              <path d="M2 12h20" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
-            </svg>
-          </a>
+              <ExternalLink className="h-3 w-3" />
+              Live
+            </a>
+          )}
           <a
             href={project.html_url}
             target="_blank"

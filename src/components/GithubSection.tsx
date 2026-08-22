@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import {
   GitBranch,
   GitFork,
@@ -8,18 +7,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { GithubData } from "../hooks/useGithubData";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { countUp, reveal } from "../lib/animations";
+import { useReveal } from "../hooks/useReveal";
+import { timeAgo } from "../lib/format";
 import {
   describeEvents,
-  timeAgo,
   totalStars,
   type ActivityItem,
 } from "../lib/github";
 import { profile } from "../config/profile";
 import { Section, SectionHeading } from "./Section";
 import { StatsSkeleton } from "./Skeleton";
+import { StatTile } from "./StatTile";
 import { GithubIcon } from "./icons";
 
 const ACTIVITY_ICONS: Record<ActivityItem["kind"], LucideIcon> = {
@@ -31,52 +29,11 @@ const ACTIVITY_ICONS: Record<ActivityItem["kind"], LucideIcon> = {
   issue: GitPullRequest,
 };
 
-function Stat({
-  label,
-  value,
-  show,
-}: {
-  label: string;
-  value: number;
-  show: boolean;
-}) {
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLDivElement>();
-  const valueRef = useRef<HTMLSpanElement | null>(null);
-
-  useEffect(() => {
-    if (inView && valueRef.current) countUp(valueRef.current, value, reduced);
-  }, [inView, value, reduced]);
-
-  if (!show) return null;
-  return (
-    <div
-      ref={ref}
-      className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
-    >
-      <span
-        ref={valueRef}
-        aria-label={`${label}: ${value}`}
-        className="text-2xl font-semibold tracking-tight"
-      >
-        {value}
-      </span>
-      <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-faint">
-        {label}
-      </p>
-    </div>
-  );
-}
-
 export function GithubSection({ github }: { github: GithubData }) {
   const { status, data } = github;
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLDivElement>();
+  const { ref, inView } = useReveal<HTMLDivElement>();
 
-  useEffect(() => {
-    if (inView && ref.current) reveal(ref.current.children, reduced);
-  }, [inView, reduced, ref]);
-
+  const stars = data ? totalStars(data.repos) : 0;
   const activity = data ? describeEvents(data.events).slice(0, 5) : [];
 
   return (
@@ -143,25 +100,29 @@ export function GithubSection({ github }: { github: GithubData }) {
                 inView ? "" : "opacity-0"
               }`}
             >
-              <Stat
+              <StatTile
                 label="Public repositories"
                 value={data.user.public_repos}
                 show
+                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
-              <Stat
+              <StatTile
                 label="Total stars"
-                value={totalStars(data.repos)}
-                show={totalStars(data.repos) > 0}
+                value={stars}
+                show={stars > 0}
+                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
-              <Stat
+              <StatTile
                 label="Followers"
                 value={data.user.followers}
                 show={data.user.followers > 0}
+                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
-              <Stat
+              <StatTile
                 label="Following"
                 value={data.user.following}
                 show={data.user.following > 0}
+                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
             </div>
 
@@ -178,7 +139,10 @@ export function GithubSection({ github }: { github: GithubData }) {
                   {activity.map((item) => {
                     const Icon = ACTIVITY_ICONS[item.kind] ?? GitBranch;
                     return (
-                      <li key={item.repo + item.date + item.kind} className="flex items-center gap-3 text-sm">
+                      <li
+                        key={item.repo + item.date + item.kind}
+                        className="flex items-center gap-3 text-sm"
+                      >
                         <span className="rounded-md border border-line bg-elevated p-1.5 text-faint">
                           <Icon className="h-3.5 w-3.5" />
                         </span>

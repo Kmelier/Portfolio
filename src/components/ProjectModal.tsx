@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, X } from "lucide-react";
-import {
-  fetchReadme,
-  languageColor,
-  readmeToPlainText,
-  timeAgo,
-  type Project,
-} from "../lib/github";
+import { timeAgo } from "../lib/format";
+import { languageColor } from "../lib/format";
+import { fetchReadme, readmeToPlainText } from "../lib/readme";
+import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { GithubIcon } from "./icons";
@@ -27,7 +24,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     "idle",
   );
 
-  // Entrance / exit animation + focus management + scroll lock
+  // Entrance / exit animation + focus management + scroll lock + focus trap
   useEffect(() => {
     if (!project) return;
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
@@ -35,8 +32,35 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     closeRef.current?.focus();
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    const focusables = () =>
+      panelRef.current?.querySelectorAll<HTMLElement>(
+        "a[href], button:not([disabled])",
+      ) ?? [];
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const list = focusables();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement;
+      const inside = panelRef.current?.contains(active) ?? false;
+      if (e.shiftKey) {
+        if (!inside || active === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (!inside || active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {

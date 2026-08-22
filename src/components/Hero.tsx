@@ -5,6 +5,20 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { profile } from "../config/profile";
 import { GithubIcon } from "./icons";
 
+/** Renders the tagline, highlighting any {braced} words with the gradient. */
+function Tagline({ text }: { text: string }) {
+  const match = /^(.*)\{(.+)\}(.*)$/s.exec(text);
+  if (!match) return <>{text}</>;
+  const [, before, highlight, after] = match;
+  return (
+    <>
+      {before}
+      <span className="text-gradient">{highlight}</span>
+      {after}
+    </>
+  );
+}
+
 export function Hero() {
   const reduced = useReducedMotion();
   const labelRef = useRef<HTMLParagraphElement | null>(null);
@@ -98,8 +112,7 @@ export function Hero() {
             reduced ? "" : "opacity-0"
           }`}
         >
-          I build things on{" "}
-          <span className="text-gradient">the web and beyond</span>.
+          <Tagline text={profile.tagline} />
         </h1>
         <p
           ref={subRef}

@@ -1,17 +1,9 @@
-import { useEffect } from "react";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { reveal } from "../lib/animations";
 import { timeline } from "../config/timeline";
 import { Section, SectionHeading } from "./Section";
+import { useReveal } from "../hooks/useReveal";
 
 export function Timeline() {
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLOListElement>();
-
-  useEffect(() => {
-    if (inView && ref.current) reveal(ref.current.children, reduced);
-  }, [inView, reduced, ref]);
+  const { ref, inView } = useReveal<HTMLOListElement>();
 
   return (
     <Section id="journey">

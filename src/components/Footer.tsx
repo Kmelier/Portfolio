@@ -1,11 +1,12 @@
-import { ChevronUp, Mail, Moon, Sun } from "lucide-react";
-import type { Theme } from "../hooks/useTheme";
+import { ChevronUp, Mail } from "lucide-react";
+import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { profile } from "../config/profile";
+import { ThemeToggleButton } from "./ThemeToggle";
 import { GithubIcon } from "./icons";
 
 interface FooterProps {
   theme: Theme;
-  onToggleTheme: (origin?: { x: number; y: number }) => void;
+  onToggleTheme: (origin?: ThemeOrigin) => void;
 }
 
 export function Footer({ theme, onToggleTheme }: FooterProps) {
@@ -35,21 +36,11 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
               <Mail className="h-4 w-4" />
             </a>
           )}
-          <button
-            type="button"
-            onClick={(e) => onToggleTheme({ x: e.clientX, y: e.clientY })}
-            aria-label={
-              theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
-            }
-            aria-pressed={theme === "light"}
-            className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </button>
+          <ThemeToggleButton
+            theme={theme}
+            onToggleTheme={onToggleTheme}
+            variant="plain"
+          />
           <a
             href="#home"
             aria-label="Back to top"

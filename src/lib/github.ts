@@ -1,4 +1,5 @@
 import { profile } from "../config/profile";
+import { capitalize } from "./format";
 import {
   excludeRepos,
   featuredProjects,
@@ -117,8 +118,10 @@ export async function fetchGithubData(): Promise<GithubSnapshot> {
 /* ── Derived data ─────────────────────────────────────────────── */
 
 /**
- * Featured repos first (in configured order), then repos with
- * stars/forks, then the rest — both latter groups by recent activity.
+ * Spec priority order:
+ *   1. featured (in configured order)
+ *   2. recently updated (pushed_at, descending)
+ *   3. stars/forks as the tiebreaker
  */
 export function organizeProjects(repos: GitHubRepo[]): Project[] {
   return repos
@@ -135,13 +138,21 @@ export function organizeProjects(repos: GitHubRepo[]): Project[] {
         return (
           featuredProjects.indexOf(a.name) - featuredProjects.indexOf(b.name)
         );
-      const engagementA = a.stargazers_count + a.forks_count > 0 ? 0 : 1;
-      const engagementB = b.stargazers_count + b.forks_count > 0 ? 0 : 1;
-      if (engagementA !== engagementB) return engagementA - engagementB;
-      return Date.parse(b.pushed_at) - Date.parse(a.pushed_at);
+      const pushedDiff = Date.parse(b.pushed_at) - Date.parse(a.pushed_at);
+      if (pushedDiff !== 0) return pushedDiff;
+      const engagementDiff =
+        b.stargazers_count +
+        b.forks_count -
+        (a.stargazers_count + a.forks_count);
+      if (engagementDiff !== 0) return engagementDiff;
+      return a.name.localeCompare(b.name);
     });
 }
 
+/**
+ * Account-wide total (matches the public_repos semantics of the stats
+ * next to it) — intentionally includes forks/archived/excluded repos.
+ */
 export function totalStars(repos: GitHubRepo[]): number {
   return repos.reduce((sum, r) => sum + r.stargazers_count, 0);
 }
@@ -192,14 +203,14 @@ export function describeEvents(events: GitHubEvent[]): ActivityItem[] {
         items.push({
           ...base,
           kind: "pr",
-          text: `${ev.payload?.action ? ev.payload.action.charAt(0).toUpperCase() + ev.payload.action.slice(1) : "Updated"} a pull request in`,
+          text: `${capitalize(ev.payload?.action ?? "Updated")} a pull request in`,
         });
         break;
       case "IssuesEvent":
         items.push({
           ...base,
           kind: "issue",
-          text: `${ev.payload?.action ? ev.payload.action.charAt(0).toUpperCase() + ev.payload.action.slice(1) : "Updated"} an issue in`,
+          text: `${capitalize(ev.payload?.action ?? "Updated")} an issue in`,
         });
         break;
       default:
@@ -207,82 +218,4 @@ export function describeEvents(events: GitHubEvent[]): ActivityItem[] {
     }
   }
   return items;
-}
-
-/* ── README preview (fetched lazily when a modal opens) ───────── */
-
-export async function fetchReadme(repo: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${profile.username}/${repo}/readme`,
-      { headers: { Accept: "application/vnd.github.raw" } },
-    );
-    if (!res.ok) return null;
-    return await res.text();
-  } catch {
-    return null;
-  }
-}
-
-/** Strip common markdown down to a plain-text preview. */
-export function readmeToPlainText(md: string, max = 700): string {
-  const text = md
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^>\s?/gm, "")
-    .replace(/[*_~]{1,3}([^*_~]+)[*_~]{1,3}/g, "$1")
-    .replace(/^[-–—=]{3,}\s*$/gm, " ")
-    .replace(/\r/g, "")
-    .replace(/\n{2,}/g, "\n")
-    .trim();
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  return `${cut.slice(0, Math.min(cut.length, cut.lastIndexOf(" ")))}…`;
-}
-
-/* ── Small formatting helpers ─────────────────────────────────── */
-
-export function timeAgo(dateStr: string): string {
-  const seconds = Math.max(0, (Date.now() - Date.parse(dateStr)) / 1000);
-  if (seconds < 60) return "just now";
-  const minutes = seconds / 60;
-  if (minutes < 60) return `${Math.floor(minutes)}m ago`;
-  const hours = minutes / 60;
-  if (hours < 24) return `${Math.floor(hours)}h ago`;
-  const days = hours / 24;
-  if (days < 31) return `${Math.floor(days)}d ago`;
-  const months = days / 30.44;
-  if (months < 12) return `${Math.floor(months)}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
-}
-
-const LANGUAGE_COLORS: Record<string, string> = {
-  Dart: "#00b4ab",
-  Python: "#3572a5",
-  JavaScript: "#f1e05a",
-  TypeScript: "#3178c6",
-  Go: "#00add8",
-  Rust: "#dea584",
-  Java: "#b07219",
-  Kotlin: "#a97bff",
-  HTML: "#e34c26",
-  CSS: "#563d7c",
-  Shell: "#89e051",
-  C: "#555555",
-  "C++": "#f34b7d",
-  "C#": "#178600",
-  Lua: "#000080",
-  PHP: "#4f5d95",
-  Ruby: "#701516",
-  Swift: "#f05138",
-  Vue: "#41b883",
-  Svelte: "#ff3e00",
-};
-
-export function languageColor(language: string | null): string {
-  if (!language) return "var(--faint)";
-  return LANGUAGE_COLORS[language] ?? "var(--faint)";
 }

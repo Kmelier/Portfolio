@@ -29,11 +29,17 @@ export function Projects({ github }: ProjectsProps) {
   const reduced = useReducedMotion();
   const [filter, setFilter] = useState("All");
   const [selectedName, setSelectedName] = useState<string | null>(null);
-  const { ref: gridRef, inView: gridInview } = useInView<HTMLDivElement>();
+  const { ref: gridRef, inView: gridInView } = useInView<HTMLDivElement>();
+  /** True while the modal hash entry is one we pushed (so Back can pop it). */
+  const pushedHash = useRef(false);
 
-  // Deep links: #/project/<name> opens the modal, hashchange keeps it in sync
+  // Deep links: #/project/<name> opens the modal; hashchange keeps it in sync
   useEffect(() => {
-    const onHash = () => setSelectedName(parseHash());
+    const onHash = () => {
+      const name = parseHash();
+      if (!name) pushedHash.current = false;
+      setSelectedName(name);
+    };
     onHash();
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
@@ -44,22 +50,29 @@ export function Projects({ github }: ProjectsProps) {
     [data],
   );
 
-  const languages = useMemo(() => {
+  /** Filter options from languages first, then topics, by frequency. */
+  const filterValues = useMemo(() => {
     const counts = new Map<string, number>();
+    const bump = (key: string | null) => {
+      if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+    };
     for (const p of projects) {
-      if (p.language) counts.set(p.language, (counts.get(p.language) ?? 0) + 1);
+      bump(p.language);
+      for (const t of p.topics) bump(t);
     }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([l]) => l);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([v]) => v);
   }, [projects]);
 
   const showFilters =
-    projects.length >= filterBarMinRepos && languages.length >= 2;
+    projects.length >= filterBarMinRepos && filterValues.length >= 2;
 
   const visible = useMemo(
     () =>
       filter === "All"
         ? projects
-        : projects.filter((p) => p.language === filter),
+        : projects.filter(
+            (p) => p.language === filter || p.topics.includes(filter),
+          ),
     [projects, filter],
   );
 
@@ -67,22 +80,32 @@ export function Projects({ github }: ProjectsProps) {
     projects.find((p) => p.name === selectedName) ?? null;
 
   // Staggered card entrance — on first reveal and on every filter change
-  const firstRun = useRef(true);
   useEffect(() => {
-    if (!gridInview || visible.length === 0) return;
-    if (firstRun.current) {
-      firstRun.current = false;
-    }
+    if (!gridInView || visible.length === 0) return;
     if (gridRef.current) staggerCards(gridRef.current.children, reduced);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gridInview, filter, projects]);
+  }, [gridInView, filter, projects]);
 
   const openProject = (project: Project) => {
-    window.location.hash = `#/project/${project.name}`;
+    pushedHash.current = true;
+    history.pushState(null, "", `#/project/${project.name}`);
+    setSelectedName(project.name);
   };
+
   const closeProject = () => {
-    history.pushState(null, "", window.location.pathname + window.location.search);
-    setSelectedName(null);
+    if (pushedHash.current) {
+      // Pop the entry we pushed — hashchange closes the modal.
+      pushedHash.current = false;
+      history.back();
+    } else {
+      // Deep-linked straight into the modal: strip the hash in place.
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+      setSelectedName(null);
+    }
   };
 
   return (
@@ -132,22 +155,22 @@ export function Projects({ github }: ProjectsProps) {
           {showFilters && (
             <div
               role="group"
-              aria-label="Filter projects by language"
+              aria-label="Filter projects by language or topic"
               className="mt-12 flex flex-wrap items-center justify-center gap-2"
             >
-              {["All", ...languages].map((lang) => (
+              {["All", ...filterValues].map((value) => (
                 <button
-                  key={lang}
+                  key={value}
                   type="button"
-                  onClick={() => setFilter(lang)}
-                  aria-pressed={filter === lang}
+                  onClick={() => setFilter(value)}
+                  aria-pressed={filter === value}
                   className={`rounded-full border px-3.5 py-1.5 font-mono text-xs transition-colors ${
-                    filter === lang
+                    filter === value
                       ? "border-accent/60 bg-accent/10 text-accent"
                       : "border-line text-muted hover:border-fg/30 hover:text-fg"
                   }`}
                 >
-                  {lang}
+                  {value}
                 </button>
               ))}
             </div>

@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * IntersectionObserver-based visibility.
- * By default fires once (elements stay revealed); pass once: false
- * for continuous tracking.
+ * IntersectionObserver-based visibility. Fires once — elements stay
+ * revealed after entering the viewport.
  */
-export function useInView<T extends HTMLElement>(options?: {
-  threshold?: number;
-  once?: boolean;
-}) {
+export function useInView<T extends HTMLElement>(threshold = 0.15) {
   const ref = useRef<T | null>(null);
   const [inView, setInView] = useState(false);
 
@@ -19,23 +15,18 @@ export function useInView<T extends HTMLElement>(options?: {
       setInView(true);
       return;
     }
-    const once = options?.once !== false;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          if (once) io.disconnect();
-        } else if (!once) {
-          setInView(false);
+          io.disconnect();
         }
       },
-      { threshold: options?.threshold ?? 0.15 },
+      { threshold },
     );
     io.observe(el);
     return () => io.disconnect();
-    // Options are read once on mount by design.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [threshold]);
 
   return { ref, inView };
 }

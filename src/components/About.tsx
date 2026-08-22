@@ -1,9 +1,6 @@
-import { useEffect } from "react";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { reveal } from "../lib/animations";
 import { profile } from "../config/profile";
 import { Section } from "./Section";
+import { useReveal } from "../hooks/useReveal";
 
 /** Info-panel rows — unconfigured fields are hidden entirely. */
 function panelRows() {
@@ -21,12 +18,7 @@ function panelRows() {
 }
 
 export function About() {
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLDivElement>();
-
-  useEffect(() => {
-    if (inView && ref.current) reveal(ref.current.children, reduced);
-  }, [inView, reduced, ref]);
+  const { ref, inView } = useReveal<HTMLDivElement>();
 
   return (
     <Section id="about">

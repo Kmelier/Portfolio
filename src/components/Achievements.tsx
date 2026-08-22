@@ -1,39 +1,8 @@
 import { manualAchievements } from "../config/achievements";
 import { skillCategories } from "../config/skills";
 import type { GithubData } from "../hooks/useGithubData";
-import { useInView } from "../hooks/useInView";
-import { useReducedMotion } from "../hooks/useReducedMotion";
-import { countUp } from "../lib/animations";
 import { totalStars } from "../lib/github";
-import { useRef, useEffect } from "react";
-
-function Counter({ label, value }: { label: string; value: number }) {
-  const reduced = useReducedMotion();
-  const { ref, inView } = useInView<HTMLDivElement>();
-  const valueRef = useRef<HTMLSpanElement | null>(null);
-
-  useEffect(() => {
-    if (inView && valueRef.current) countUp(valueRef.current, value, reduced);
-  }, [inView, value, reduced]);
-
-  return (
-    <div
-      ref={ref}
-      className="card-glow rounded-2xl border border-line bg-surface px-6 py-8 text-center"
-    >
-      <span
-        ref={valueRef}
-        aria-label={`${label}: ${value}`}
-        className="text-3xl font-semibold tracking-tight"
-      >
-        {value}
-      </span>
-      <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-faint">
-        {label}
-      </p>
-    </div>
-  );
-}
+import { StatTile } from "./StatTile";
 
 /**
  * Subtle stats band. Values that are zero/unset are hidden; the whole
@@ -66,7 +35,13 @@ export function Achievements({ github }: { github: GithubData }) {
     >
       <div className="grid gap-4 sm:grid-cols-3">
         {candidates.map((c) => (
-          <Counter key={c.label} label={c.label} value={c.value} />
+          <StatTile
+            key={c.label}
+            label={c.label}
+            value={c.value}
+            className="card-glow rounded-2xl border border-line bg-surface px-6 py-8 text-center"
+            valueClassName="text-3xl font-semibold tracking-tight"
+          />
         ))}
       </div>
     </section>
