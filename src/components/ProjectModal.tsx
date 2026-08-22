@@ -87,7 +87,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     setReadmeState("loading");
     void fetchReadme(project.name).then((md) => {
       if (cancelled) return;
-      setReadme(md ? readmeToPlainText(md) : null);
+      setReadme(md ? readmeToPlainText(md, Infinity) : null);
       setReadmeState("done");
     });
     return () => {
@@ -126,7 +126,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-0 dark:backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/55 p-0 backdrop-blur-md sm:items-center sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
@@ -229,7 +229,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
         <div className="mt-8 border-t border-line pt-6">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-faint">
-            README preview
+            README
           </p>
           {readmeState === "loading" && (
             <div className="mt-4 space-y-2.5">

@@ -228,7 +228,7 @@ export function CommandPalette({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/60 p-4 pt-[12vh] dark:backdrop-blur-sm sm:p-6"
+      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/55 p-4 pt-[12vh] backdrop-blur-md sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
