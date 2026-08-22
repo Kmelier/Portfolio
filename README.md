@@ -38,20 +38,11 @@ npm run preview   # serve the production build locally
 Repositories themselves are **never hardcoded** — they come from
 `https://api.github.com/users/Kmelier/repos` on every visit (cached 10 min).
 
-## Deploy (GitHub + Vercel, ~3 minutes)
+## Deploy
 
-1. **Push to GitHub**
-   ```bash
-   git remote add origin https://github.com/Kmelier/portfolio.git
-   git push -u origin main
-   ```
-   (Create the repo first at <https://github.com/new> — name it `portfolio`, set it **public**. It's already excluded from the Projects list.)
+**Live at [kmelier.vercel.app](https://kmelier.vercel.app)** — auto-deploys from `main`.
 
-2. **Deploy on Vercel** — go to <https://vercel.com/new>, import the `Kmelier/portfolio` repo, keep the defaults (Vite is auto-detected), click **Deploy**. You'll get `https://portfolio-*.vercel.app`; rename the project to `kmelier` in Vercel settings for `https://kmelier.vercel.app`.
-
-3. **After deploy** — if you use a custom domain or a different project name, update `og:url` in `index.html`.
-
-Every future `git push` redeploys automatically.
+The GitHub repo (`Kmelier/Portfolio`) is connected to the Vercel project: every `git push` ships to production automatically. To deploy manually instead: `vercel --prod`. If a custom domain is ever added, update `og:url` in `index.html`.
 
 ## Notes
 
