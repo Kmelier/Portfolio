@@ -132,12 +132,13 @@ export async function fetchGithubData(): Promise<GithubSnapshot> {
  *   3. stars/forks as the tiebreaker
  */
 export function organizeProjects(repos: GitHubRepo[]): Project[] {
+  const excluded = excludeRepos.map((name) => name.toLowerCase());
   return repos
     .filter(
       (r) =>
         (includeForks || !r.fork) &&
         !r.archived &&
-        !excludeRepos.includes(r.name),
+        !excluded.includes(r.name.toLowerCase()),
     )
     .map((r) => ({ ...r, featured: featuredProjects.includes(r.name) }))
     .sort((a, b) => {
