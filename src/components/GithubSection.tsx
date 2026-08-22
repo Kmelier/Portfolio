@@ -48,11 +48,11 @@ export function GithubSection({ github }: { github: GithubData }) {
         {/* Aurora glows behind the section content */}
         <div
           aria-hidden
-          className="pointer-events-none absolute bottom-4 left-1/2 h-[320px] w-[660px] -translate-x-1/2 rounded-full bg-accent/[0.05] blur-[110px] dark:bg-accent/[0.08]"
+          className="glow-accent pointer-events-none absolute bottom-4 left-1/2 h-[320px] w-[660px] -translate-x-1/2"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute right-0 top-20 h-[260px] w-[380px] rounded-full bg-accent-2/[0.04] blur-[100px] dark:bg-accent-2/[0.07]"
+          className="glow-accent-2 pointer-events-none absolute right-0 top-20 h-[260px] w-[380px]"
         />
         {data ? (
           <div ref={ref} className="relative">

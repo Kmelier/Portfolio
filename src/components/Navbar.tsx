@@ -173,9 +173,10 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
     <header
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${
         scrolled || menuOpen
-          ? // Near-opaque in light (blur smears dark text while
-            // scrolling); dark keeps the deep translucent blur.
-            "border-line bg-bg/95 backdrop-blur-sm dark:bg-bg/80 dark:backdrop-blur-xl"
+          ? // Fully opaque in light — no backdrop-filter layer at all
+            // (dark text smearing behind a blur reads as scroll jank).
+            // Dark keeps its deep translucent blur.
+            "border-line bg-bg dark:bg-bg/80 dark:backdrop-blur-xl"
           : "border-transparent bg-transparent"
       }`}
     >
@@ -225,7 +226,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub profile (opens in a new tab)"
-            className="rounded-lg border border-line bg-surface/50 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
+            className="rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
           >
             <GithubIcon className="h-4 w-4" />
           </a>

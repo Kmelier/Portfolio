@@ -143,6 +143,24 @@ html.theme-transition *::after {
   mask-image: radial-gradient(ellipse 85% 65% at 50% 32%, black 25%, transparent 78%);
 }
 
+/* ── Aurora glows ───────────────────────────────────────────────
+   Radial gradients instead of blurred divs: same soft look, but no
+   filter: blur() GPU cost (the most expensive paint on the page). */
+.glow-accent {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--accent) 13%, transparent),
+    transparent 72%
+  );
+}
+.glow-accent-2 {
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--accent-2) 10%, transparent),
+    transparent 72%
+  );
+}
+
 /* ── Gradient accent text (indigo → violet) ───────────────────── */
 .text-gradient {
   background: linear-gradient(120deg, var(--accent), var(--accent-2));

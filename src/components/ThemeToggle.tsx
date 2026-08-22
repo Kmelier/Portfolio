@@ -33,7 +33,7 @@ export function ThemeToggleButton({
       aria-pressed={theme === "light"}
       className={
         variant === "bordered"
-          ? "rounded-lg border border-line bg-surface/50 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
+          ? "rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
           : "rounded-lg p-2 text-muted transition-colors hover:text-fg"
       }
     >

@@ -11,6 +11,7 @@ const STORAGE_KEY = "kmelier:theme";
 
 interface ViewTransitionLike {
   ready: Promise<void>;
+  finished?: Promise<void>;
 }
 
 /**
@@ -49,6 +50,8 @@ export function useTheme() {
 
         if (!reduced && origin && typeof doc.startViewTransition === "function") {
           const transition = doc.startViewTransition(apply);
+          // Guard both promises so a skipped transition never rejects
+          // unhandled or lingers past its cleanup.
           transition.ready
             .then(() => {
               const radius = Math.hypot(
@@ -73,6 +76,9 @@ export function useTheme() {
             .catch(() => {
               /* transition skipped — the theme still applied */
             });
+          transition.finished?.catch(() => {
+            /* cleanup is the browser's job; never reject unhandled */
+          });
         } else {
           root.classList.add("theme-transition");
           apply();
