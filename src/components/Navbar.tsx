@@ -173,7 +173,9 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
     <header
       className={`sticky top-0 z-50 border-b transition-all duration-300 ${
         scrolled || menuOpen
-          ? "border-line bg-bg/80 backdrop-blur-xl"
+          ? // Near-opaque in light (blur smears dark text while
+            // scrolling); dark keeps the deep translucent blur.
+            "border-line bg-bg/95 backdrop-blur-sm dark:bg-bg/80 dark:backdrop-blur-xl"
           : "border-transparent bg-transparent"
       }`}
     >

@@ -20,20 +20,20 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* ── Theme tokens: light (cool slate / technical) ─────────────── */
+/* ── Theme tokens: light ("indigo daylight" — tinted neutrals) ── */
 :root {
-  --bg: #f6f7f9;
+  --bg: #f4f4fa;
   --surface: #ffffff;
-  --elevated: #eef0f4;
-  --line: #e2e5ea;
-  --fg: #101116;
-  --muted: #4b5162;
-  --faint: #83899a;
+  --elevated: #ededf6;
+  --line: #e3e3ef;
+  --fg: #14131f;
+  --muted: #4d4b63;
+  --faint: #86839e;
   --accent: #4f5ee8;
   --accent-2: #7c5ce6;
-  --grid-line: rgb(15 23 42 / 0.05);
-  --shadow-card: 0 1px 2px rgb(16 17 22 / 0.05), 0 10px 28px -14px rgb(16 17 22 / 0.1);
-  --shadow-card-hover: 0 2px 6px rgb(16 17 22 / 0.06), 0 20px 44px -16px rgb(16 17 22 / 0.16);
+  --grid-line: rgb(76 87 200 / 0.055);
+  --shadow-card: 0 1px 2px rgb(76 82 160 / 0.04), 0 8px 24px -16px rgb(76 82 160 / 0.1);
+  --shadow-card-hover: 0 2px 6px rgb(76 82 160 / 0.05), 0 16px 40px -18px rgb(76 82 160 / 0.14);
   --inner-highlight: inset 0 1px 0 rgb(255 255 255 / 0.85);
 }
 
@@ -79,21 +79,17 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Faint noise-grain texture over everything (adds depth, not color) */
-  body::after {
+  /* Faint noise grain — dark theme only (it shimmers over light
+     surfaces and adds a needless compositing layer in light mode) */
+  html.dark body::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 100;
     pointer-events: none;
-    opacity: 0.028;
+    opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 180px 180px;
-  }
-
-  .dark body::after,
-  html.dark body::after {
-    opacity: 0.05;
   }
 
   section[id] {
