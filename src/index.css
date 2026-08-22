@@ -135,6 +135,14 @@ html.theme-transition *::after {
     box-shadow 0.35s ease !important;
 }
 
+/* ── Hero heading words (Anime.js staggered entrance) ─────────── */
+.hero-word {
+  display: inline-block;
+}
+.pre-words .hero-word {
+  opacity: 0;
+}
+
 /* ── Faint technical grid background ──────────────────────────── */
 .bg-grid {
   background-image:
@@ -183,10 +191,11 @@ html.theme-transition *::after {
     ) border-box;
 }
 
-/* ── Cards: resting shadow + inner top highlight, deeper on hover ── */
+/* ── Cards: resting shadow + inner top highlight, deeper on hover ──
+   Transform is deliberately NOT transitioned — card hover movement is
+   spring-driven by Anime.js (see cardSpringIn/cardSpringOut). */
 .card-glow {
   transition:
-    transform 0.3s ease,
     border-color 0.3s ease,
     box-shadow 0.3s ease;
   box-shadow: var(--shadow-card), var(--inner-highlight);

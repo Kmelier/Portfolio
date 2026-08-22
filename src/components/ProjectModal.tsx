@@ -150,6 +150,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             type="button"
             onClick={requestClose}
             aria-label="Close project details"
+            data-spring
             className="rounded-lg border border-line p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
           >
             <X className="h-4 w-4" />
@@ -201,6 +202,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
             href={project.html_url}
             target="_blank"
             rel="noreferrer noopener"
+            data-spring
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90"
           >
             <GithubIcon className="h-4 w-4" />
@@ -211,6 +213,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               href={liveUrl}
               target="_blank"
               rel="noreferrer noopener"
+              data-spring
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-line px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50"
             >
               <ExternalLink className="h-4 w-4" />

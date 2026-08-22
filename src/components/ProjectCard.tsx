@@ -1,6 +1,8 @@
 import { ArrowUpRight, ExternalLink, GitFork, Star } from "lucide-react";
 import { languageColor, timeAgo } from "../lib/format";
 import type { Project } from "../lib/github";
+import { cardSpringIn, cardSpringOut } from "../lib/animations";
+import { useReducedMotion } from "../hooks/useReducedMotion";
 import { safeHttpUrl } from "../lib/url";
 import { GithubIcon } from "./icons";
 
@@ -10,12 +12,15 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onOpen }: ProjectCardProps) {
+  const reduced = useReducedMotion();
   const tags = project.topics.slice(0, 3);
   const liveUrl = safeHttpUrl(project.homepage);
 
   return (
     <article
-      className={`card-glow group relative flex h-full flex-col rounded-2xl p-5 hover:-translate-y-1 ${
+      onMouseEnter={(e) => cardSpringIn(e.currentTarget, reduced)}
+      onMouseLeave={(e) => cardSpringOut(e.currentTarget, reduced)}
+      className={`card-glow group relative flex h-full flex-col rounded-2xl p-5 ${
         project.featured ? "gradient-border" : "border border-line bg-surface"
       }`}
     >
@@ -30,6 +35,7 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
               target="_blank"
               rel="noreferrer noopener"
               aria-label={`Live demo of ${project.name} (opens in a new tab)`}
+              data-spring
               className="inline-flex items-center gap-1 rounded-md border border-line bg-elevated px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-muted transition-colors hover:border-accent/40 hover:text-fg"
             >
               <ExternalLink className="h-3 w-3" />
@@ -41,6 +47,7 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
             target="_blank"
             rel="noreferrer noopener"
             aria-label={`GitHub repository of ${project.name} (opens in a new tab)`}
+            data-spring
             className="rounded-md p-1.5 text-faint transition-colors hover:bg-elevated hover:text-fg"
           >
             <GithubIcon className="h-4 w-4" />

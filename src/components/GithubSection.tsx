@@ -86,6 +86,7 @@ export function GithubSection({ github }: { github: GithubData }) {
                 href={data.user.html_url}
                 target="_blank"
                 rel="noreferrer noopener"
+                data-spring
                 className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm font-medium transition-colors hover:border-accent/50"
               >
                 <GithubIcon className="h-4 w-4" />

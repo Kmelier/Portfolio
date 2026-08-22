@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { useTheme } from "./hooks/useTheme";
 import { useGithubData } from "./hooks/useGithubData";
+import { attachSpringHover } from "./lib/animations";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
 import { About } from "./components/About";
@@ -14,6 +16,9 @@ import { Footer } from "./components/Footer";
 export default function App() {
   const { theme, toggle } = useTheme();
   const github = useGithubData();
+
+  // One delegated listener set powers every [data-spring] control
+  useEffect(() => attachSpringHover(), []);
 
   return (
     <>

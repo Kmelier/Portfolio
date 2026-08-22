@@ -1,4 +1,4 @@
-import { animate, createTimeline, stagger } from "animejs";
+import { animate, createTimeline, stagger, spring } from "animejs";
 
 /**
  * Reusable Anime.js (v4) helpers.
@@ -7,10 +7,22 @@ import { animate, createTimeline, stagger } from "animejs";
 
 type AnimTargets = Parameters<typeof animate>[0];
 
+/* ── Spring easings (the anime.js v4 signature feel) ──────────────
+   Factories, not constants: a Spring binds to its animation. */
+const springHover = () => spring({ bounce: 0.35, duration: 450 });
+const springCard = () => spring({ bounce: 0.25, duration: 500 });
+const springWords = () => spring({ bounce: 0.4, duration: 550 });
+const springMagnet = () => spring({ bounce: 0.15, duration: 350 });
+const springPress = () => spring({ bounce: 0, duration: 200 });
+
+const prefersReduced = () =>
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 export function heroEntrance(
   targets: {
     label: Element | null;
-    heading: Element | null;
+    /** Hero heading words (`.hero-word` spans), staggered with a spring. */
+    words: Element[];
     sub: Element | null;
     buttons: (Element | null)[];
   },
@@ -18,23 +30,34 @@ export function heroEntrance(
 ): void {
   if (reduced) return;
   const buttons = targets.buttons.filter(Boolean);
+
+  // Words run as a standalone animation: spring easings are solver-
+  // driven and cannot live inside a timeline (their duration isn't
+  // fixed). Sequencing comes from the stagger's start offset.
+  if (targets.words.length > 0) {
+    animate(targets.words, {
+      opacity: [0, 1],
+      translateY: [32, 0],
+      duration: 700,
+      ease: springWords(),
+      delay: stagger(65, { start: 350 }),
+    });
+  }
+
   const tl = createTimeline({
     defaults: { ease: "outExpo", duration: 900 },
   });
   if (targets.label) {
     tl.add(targets.label, { opacity: [0, 1], translateY: [14, 0] }, 100);
   }
-  if (targets.heading) {
-    tl.add(targets.heading, { opacity: [0, 1], translateY: [26, 0] }, "-=650");
-  }
   if (targets.sub) {
-    tl.add(targets.sub, { opacity: [0, 1], translateY: [18, 0] }, "-=700");
+    tl.add(targets.sub, { opacity: [0, 1], translateY: [18, 0] }, "-=450");
   }
   if (buttons.length > 0) {
     tl.add(
       buttons,
       { opacity: [0, 1], translateY: [12, 0], delay: stagger(110) },
-      "-=650",
+      "-=600",
     );
   }
 }
@@ -104,7 +127,126 @@ export function countUp(
   });
 }
 
-/** Modal entrance: backdrop fade + panel rise. */
+/** Blinking terminal caret (label `_`). */
+export function blinkCaret(el: HTMLElement | null, reduced: boolean): void {
+  if (!el || reduced) return;
+  animate(el, {
+    opacity: [
+      { to: 0, duration: 480, ease: "linear" },
+      { to: 1, duration: 480, ease: "linear" },
+    ],
+    loop: true,
+  });
+}
+
+/**
+ * Delegated springy hover/press for any element carrying `data-spring`.
+ * One listener set for the whole document; returns a cleanup fn.
+ */
+export function attachSpringHover(): () => void {
+  const springEl = (target: EventTarget | null): HTMLElement | null => {
+    if (!(target instanceof Element)) return null;
+    return target.closest<HTMLElement>("[data-spring]");
+  };
+  const onOver = (e: MouseEvent) => {
+    if (prefersReduced()) return;
+    const el = springEl(e.target);
+    if (!el || el.contains(e.relatedTarget as Node | null)) return;
+    animate(el, { scale: 1.035, duration: 450, ease: springHover() });
+  };
+  const onOut = (e: MouseEvent) => {
+    if (prefersReduced()) return;
+    const el = springEl(e.target);
+    if (!el || el.contains(e.relatedTarget as Node | null)) return;
+    animate(el, { scale: 1, duration: 450, ease: springHover() });
+  };
+  const onDown = (e: PointerEvent) => {
+    if (prefersReduced()) return;
+    const el = springEl(e.target);
+    if (el) animate(el, { scale: 0.96, duration: 200, ease: springPress() });
+  };
+  const onUp = (e: PointerEvent) => {
+    if (prefersReduced()) return;
+    const el = springEl(e.target);
+    if (el) animate(el, { scale: 1.035, duration: 300, ease: springPress() });
+  };
+  document.addEventListener("mouseover", onOver);
+  document.addEventListener("mouseout", onOut);
+  document.addEventListener("pointerdown", onDown);
+  document.addEventListener("pointerup", onUp);
+  return () => {
+    document.removeEventListener("mouseover", onOver);
+    document.removeEventListener("mouseout", onOut);
+    document.removeEventListener("pointerdown", onDown);
+    document.removeEventListener("pointerup", onUp);
+  };
+}
+
+/** Activation bounce for filter pills. */
+export function activatePulse(el: HTMLElement, reduced: boolean): void {
+  if (reduced) return;
+  animate(el, { scale: [1.14, 1], duration: 450, ease: springHover() });
+}
+
+/** Card hover lift with spring (replaces the CSS transition lift). */
+export function cardSpringIn(el: HTMLElement, reduced: boolean): void {
+  if (reduced) return;
+  animate(el, {
+    translateY: -6,
+    scale: 1.006,
+    duration: 500,
+    ease: springCard(),
+  });
+}
+export function cardSpringOut(el: HTMLElement, reduced: boolean): void {
+  if (reduced) return;
+  animate(el, { translateY: 0, scale: 1, duration: 500, ease: springCard() });
+}
+
+/**
+ * Cursor-follow "magnetic" effect for the hero primary button.
+ * Fine pointers only; no-ops for reduced motion. Returns a cleanup fn.
+ */
+export function attachMagnetic(el: HTMLElement): () => void {
+  if (!window.matchMedia("(pointer: fine)").matches) return () => {};
+  const MAX_X = 6;
+  const MAX_Y = 5;
+  const onMove = (e: PointerEvent) => {
+    if (prefersReduced()) return;
+    const r = el.getBoundingClientRect();
+    const nx = Math.max(
+      -1,
+      Math.min(1, (e.clientX - (r.left + r.width / 2)) / (r.width / 2)),
+    );
+    const ny = Math.max(
+      -1,
+      Math.min(1, (e.clientY - (r.top + r.height / 2)) / (r.height / 2)),
+    );
+    animate(el, {
+      translateX: nx * MAX_X,
+      translateY: ny * MAX_Y,
+      duration: 350,
+      ease: springMagnet(),
+    });
+  };
+  const onLeave = () => {
+    if (prefersReduced()) return;
+    animate(el, {
+      translateX: 0,
+      translateY: 0,
+      duration: 550,
+      ease: springMagnet(),
+    });
+  };
+  el.addEventListener("pointermove", onMove);
+  el.addEventListener("pointerleave", onLeave);
+  return () => {
+    el.removeEventListener("pointermove", onMove);
+    el.removeEventListener("pointerleave", onLeave);
+  };
+}
+
+/** Modal entrance: backdrop fade + panel spring rise. */
 export function modalIn(
   backdrop: HTMLElement | null,
   panel: HTMLElement | null,
@@ -116,12 +258,12 @@ export function modalIn(
     duration: 220,
     ease: "outQuad",
   });
+  animate(panel, { opacity: [0, 1], duration: 180, ease: "outQuad" });
   animate(panel, {
-    opacity: [0, 1],
     scale: [0.96, 1],
-    translateY: [14, 0],
-    duration: 320,
-    ease: "outExpo",
+    translateY: [16, 0],
+    duration: 550,
+    ease: springCard(),
   });
 }
 
@@ -146,14 +288,14 @@ export function modalOut(
   });
 }
 
-/** Small pop for the theme-toggle icon swap. */
+/** Spring pop for the theme-toggle icon swap. */
 export function iconPop(el: HTMLElement | null, reduced: boolean): void {
   if (reduced || !el) return;
   animate(el, {
     scale: [0.6, 1],
     rotate: [-60, 0],
     opacity: [0, 1],
-    duration: 320,
-    ease: "outBack",
+    duration: 450,
+    ease: springHover(),
   });
 }

@@ -3,7 +3,7 @@ import { RefreshCw } from "lucide-react";
 import type { GithubData } from "../hooks/useGithubData";
 import { useInView } from "../hooks/useInView";
 import { useReducedMotion } from "../hooks/useReducedMotion";
-import { staggerCards } from "../lib/animations";
+import { staggerCards, activatePulse } from "../lib/animations";
 import { organizeProjects, type Project } from "../lib/github";
 import { filterBarMinRepos } from "../config/projects";
 import { profile } from "../config/profile";
@@ -127,6 +127,7 @@ export function Projects({ github }: ProjectsProps) {
             <button
               type="button"
               onClick={refetch}
+              data-spring
               className="inline-flex items-center gap-2 rounded-lg border border-line px-4 py-2 text-sm font-medium transition-colors hover:border-accent/50"
             >
               <RefreshCw className="h-4 w-4" />
@@ -136,6 +137,7 @@ export function Projects({ github }: ProjectsProps) {
               href={profile.social.github}
               target="_blank"
               rel="noreferrer noopener"
+              data-spring
               className="inline-flex items-center gap-2 rounded-lg bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-90"
             >
               <GithubIcon className="h-4 w-4" />
@@ -161,8 +163,12 @@ export function Projects({ github }: ProjectsProps) {
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setFilter(value)}
+                  onClick={(e) => {
+                    setFilter(value);
+                    activatePulse(e.currentTarget, reduced);
+                  }}
                   aria-pressed={filter === value}
+                  data-spring
                   className={`rounded-full border px-3.5 py-1.5 font-mono text-xs transition-colors ${
                     filter === value
                       ? "border-accent/60 bg-accent/10 text-accent"

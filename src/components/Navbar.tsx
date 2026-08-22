@@ -226,6 +226,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub profile (opens in a new tab)"
+            data-spring
             className={iconButtonClass}
           >
             <GithubIcon className="h-4 w-4" />
@@ -235,6 +236,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
 
           <button
             type="button"
+            data-spring
             onClick={() => setMenuOpen((v) => !v)}
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"

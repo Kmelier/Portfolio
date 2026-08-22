@@ -27,6 +27,7 @@ export function ThemeToggleButton({
   return (
     <button
       type="button"
+      data-spring
       onClick={(e) => {
         onToggleTheme({ x: e.clientX, y: e.clientY });
         iconPop(iconRef.current, reduced);

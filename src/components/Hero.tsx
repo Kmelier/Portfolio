@@ -1,23 +1,35 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
-import { heroEntrance, startFloat } from "../lib/animations";
+import {
+  attachMagnetic,
+  blinkCaret,
+  heroEntrance,
+  startFloat,
+} from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { profile } from "../config/profile";
 import { GithubIcon } from "./icons";
 
-/** Hero heading from config segments; `highlight` gets the gradient. */
+/** Hero heading from config segments, split into staggerable words. */
 function Tagline() {
+  const words: { text: string; highlight?: boolean }[] = [];
+  for (const segment of profile.tagline) {
+    for (const word of segment.text.split(" ").filter(Boolean)) {
+      words.push({ text: word, highlight: segment.highlight });
+    }
+  }
   return (
     <>
-      {profile.tagline.map((segment, i) =>
-        segment.highlight ? (
-          <span key={i} className="text-gradient">
-            {segment.text}
+      {words.map((word, i) => (
+        <span key={i}>
+          <span
+            className={`hero-word ${word.highlight ? "text-gradient" : ""}`}
+          >
+            {word.text}
           </span>
-        ) : (
-          <span key={i}>{segment.text}</span>
-        ),
-      )}
+          {i < words.length - 1 ? " " : null}
+        </span>
+      ))}
     </>
   );
 }
@@ -25,16 +37,21 @@ function Tagline() {
 export function Hero() {
   const reduced = useReducedMotion();
   const labelRef = useRef<HTMLParagraphElement | null>(null);
+  const caretRef = useRef<HTMLSpanElement | null>(null);
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const subRef = useRef<HTMLParagraphElement | null>(null);
+  const primaryRef = useRef<HTMLAnchorElement | null>(null);
   const buttonRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const floatRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
+    const words = Array.from(
+      headingRef.current?.querySelectorAll(".hero-word") ?? [],
+    );
     heroEntrance(
       {
         label: labelRef.current,
-        heading: headingRef.current,
+        words,
         sub: subRef.current,
         buttons: buttonRefs.current,
       },
@@ -44,6 +61,9 @@ export function Hero() {
       floatRefs.current.filter((el): el is HTMLElement => el !== null),
       reduced,
     );
+    blinkCaret(caretRef.current, reduced);
+    const primary = primaryRef.current;
+    return primary ? attachMagnetic(primary) : undefined;
   }, []);
 
   return (
@@ -101,16 +121,21 @@ export function Hero() {
       <div className="relative mx-auto max-w-3xl px-6 pb-28 pt-28 text-center sm:pt-36">
         <p
           ref={labelRef}
-          className={`text-gradient font-mono text-xs font-medium uppercase tracking-[0.25em] ${
+          className={`text-gradient inline-flex items-center font-mono text-xs font-medium uppercase tracking-[0.25em] ${
             reduced ? "" : "opacity-0"
           }`}
         >
           Hello, I'm Kmelier
+          <span
+            ref={caretRef}
+            aria-hidden
+            className="ml-2 inline-block h-[0.85em] w-[2px] translate-y-[1px] bg-accent"
+          />
         </p>
         <h1
           ref={headingRef}
           className={`mt-6 text-balance text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl ${
-            reduced ? "" : "opacity-0"
+            reduced ? "" : "pre-words"
           }`}
         >
           <Tagline />
@@ -127,9 +152,11 @@ export function Hero() {
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             ref={(el) => {
+              primaryRef.current = el;
               buttonRefs.current[0] = el;
             }}
             href="#projects"
+            data-spring
             className={`group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90 sm:w-auto ${
               reduced ? "" : "opacity-0"
             }`}
@@ -144,6 +171,7 @@ export function Hero() {
             href={profile.social.github}
             target="_blank"
             rel="noreferrer noopener"
+            data-spring
             className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface/70 px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50 sm:w-auto ${
               reduced ? "" : "opacity-0"
             }`}

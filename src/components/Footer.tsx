@@ -23,6 +23,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub profile (opens in a new tab)"
+            data-spring
             className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
           >
             <GithubIcon className="h-4 w-4" />
@@ -31,6 +32,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
             <a
               href={`mailto:${profile.email}`}
               aria-label="Send an email"
+              data-spring
               className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
             >
               <Mail className="h-4 w-4" />
@@ -44,6 +46,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
           <a
             href="#home"
             aria-label="Back to top"
+            data-spring
             className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
           >
             <ChevronUp className="h-4 w-4" />
