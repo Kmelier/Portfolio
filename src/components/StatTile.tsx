@@ -3,22 +3,35 @@ import { useInView } from "../hooks/useInView";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { countUp } from "../lib/animations";
 
+type StatTileVariant = "tile" | "counter";
+
+/** Presentation lives here so call sites never repeat it. */
+const VARIANT_CLASSES: Record<StatTileVariant, string> = {
+  tile: "tile rounded-xl border border-line bg-elevated px-4 py-4 text-center",
+  counter:
+    "card-glow rounded-2xl border border-line bg-surface px-6 py-8 text-center",
+};
+
+const VARIANT_VALUE_CLASSES: Record<StatTileVariant, string> = {
+  tile: "text-2xl font-semibold tracking-tight",
+  counter: "text-3xl font-semibold tracking-tight",
+};
+
 interface StatTileProps {
   label: string;
   value: number;
+  /** "tile" = compact GitHub stat, "counter" = large achievement band. */
+  variant?: StatTileVariant;
   /** Render nothing when false (used to hide zero-value stats). */
   show?: boolean;
-  className?: string;
-  valueClassName?: string;
 }
 
 /** Animated number tile — counts up when it enters the viewport. */
 export function StatTile({
   label,
   value,
+  variant = "tile",
   show = true,
-  className = "",
-  valueClassName = "text-2xl font-semibold tracking-tight",
 }: StatTileProps) {
   const reduced = useReducedMotion();
   const { ref, inView } = useInView<HTMLDivElement>();
@@ -29,12 +42,13 @@ export function StatTile({
   }, [inView, value, reduced]);
 
   if (!show) return null;
+
   return (
-    <div ref={ref} className={className}>
+    <div ref={ref} className={VARIANT_CLASSES[variant]}>
       <span
         ref={valueRef}
         aria-label={`${label}: ${value}`}
-        className={valueClassName}
+        className={VARIANT_VALUE_CLASSES[variant]}
       >
         {value}
       </span>

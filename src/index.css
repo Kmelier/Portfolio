@@ -21,6 +21,8 @@
 }
 
 /* ── Theme tokens: light ("indigo daylight" — tinted neutrals) ── */
+/* The --bg hexes mirror literal colors in index.html (theme-color),
+   public/theme-init.js and src/hooks/useTheme.ts — update together. */
 :root {
   --bg: #f4f4fa;
   --surface: #ffffff;

@@ -3,7 +3,7 @@ import { animate, stagger } from "animejs";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { profile } from "../config/profile";
-import { ThemeToggleButton } from "./ThemeToggle";
+import { ThemeToggleButton, iconButtonClass } from "./ThemeToggle";
 import { GithubIcon } from "./icons";
 
 const NAV_ITEMS = [
@@ -226,7 +226,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
             target="_blank"
             rel="noreferrer noopener"
             aria-label="GitHub profile (opens in a new tab)"
-            className="rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
+            className={iconButtonClass}
           >
             <GithubIcon className="h-4 w-4" />
           </a>

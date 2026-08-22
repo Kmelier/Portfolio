@@ -5,16 +5,19 @@ import { useReducedMotion } from "../hooks/useReducedMotion";
 import { profile } from "../config/profile";
 import { GithubIcon } from "./icons";
 
-/** Renders the tagline, highlighting any {braced} words with the gradient. */
-function Tagline({ text }: { text: string }) {
-  const match = /^(.*)\{(.+)\}(.*)$/s.exec(text);
-  if (!match) return <>{text}</>;
-  const [, before, highlight, after] = match;
+/** Hero heading from config segments; `highlight` gets the gradient. */
+function Tagline() {
   return (
     <>
-      {before}
-      <span className="text-gradient">{highlight}</span>
-      {after}
+      {profile.tagline.map((segment, i) =>
+        segment.highlight ? (
+          <span key={i} className="text-gradient">
+            {segment.text}
+          </span>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        ),
+      )}
     </>
   );
 }
@@ -41,8 +44,6 @@ export function Hero() {
       floatRefs.current.filter((el): el is HTMLElement => el !== null),
       reduced,
     );
-    // Entrance runs once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -112,7 +113,7 @@ export function Hero() {
             reduced ? "" : "opacity-0"
           }`}
         >
-          <Tagline text={profile.tagline} />
+          <Tagline />
         </h1>
         <p
           ref={subRef}

@@ -9,6 +9,8 @@
     document.documentElement.classList.toggle("dark", dark);
     document.documentElement.style.colorScheme = dark ? "dark" : "light";
     var themeMeta = document.querySelector('meta[name="theme-color"]');
+    // #0a0a0c / #f4f4fa mirror the --bg tokens in src/index.css —
+    // also update index.html and src/hooks/useTheme.ts together.
     if (themeMeta)
       themeMeta.setAttribute("content", dark ? "#0a0a0c" : "#f4f4fa");
   } catch (e) {

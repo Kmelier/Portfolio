@@ -4,6 +4,10 @@ import { iconPop } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 
+/** Shared bordered icon-button classes (toggle + navbar GitHub link). */
+export const iconButtonClass =
+  "rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg";
+
 interface ThemeToggleButtonProps {
   theme: Theme;
   onToggleTheme: (origin?: ThemeOrigin) => void;
@@ -31,11 +35,7 @@ export function ThemeToggleButton({
         theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
       }
       aria-pressed={theme === "light"}
-      className={
-        variant === "bordered"
-          ? "rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg"
-          : "rounded-lg p-2 text-muted transition-colors hover:text-fg"
-      }
+      className={variant === "bordered" ? iconButtonClass : "rounded-lg p-2 text-muted transition-colors hover:text-fg"}
     >
       <span ref={iconRef} className="block">
         {theme === "dark" ? (

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, X } from "lucide-react";
-import { timeAgo } from "../lib/format";
-import { languageColor } from "../lib/format";
+import { languageColor, timeAgo } from "../lib/format";
 import { fetchReadme, readmeToPlainText } from "../lib/readme";
 import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
@@ -14,6 +13,9 @@ interface ProjectModalProps {
   onClose: () => void;
 }
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
   const reduced = useReducedMotion();
   const backdropRef = useRef<HTMLDivElement | null>(null);
@@ -25,6 +27,14 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     "idle",
   );
 
+  /** Every close path funnels through here: exit animation, focus restore. */
+  const requestClose = () => {
+    modalOut(backdropRef.current, panelRef.current, reduced, () => {
+      restoreFocusRef.current?.focus?.();
+      onClose();
+    });
+  };
+
   // Entrance / exit animation + focus management + scroll lock + focus trap
   useEffect(() => {
     if (!project) return;
@@ -34,18 +44,16 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    const focusables = () =>
-      panelRef.current?.querySelectorAll<HTMLElement>(
-        "a[href], button:not([disabled])",
-      ) ?? [];
-
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        requestClose();
         return;
       }
       if (e.key !== "Tab") return;
-      const list = focusables();
+      const list =
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          FOCUSABLE_SELECTOR,
+        ) ?? [];
       if (list.length === 0) return;
       const first = list[0];
       const last = list[list.length - 1];
@@ -68,7 +76,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint is not configured; the effect intentionally runs per project
   }, [project?.name]);
 
   // Lazy README fetch — only when the modal actually opens
@@ -90,13 +98,6 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   if (!project) return null;
 
   const liveUrl = safeHttpUrl(project.homepage);
-
-  const requestClose = () => {
-    modalOut(backdropRef.current, panelRef.current, reduced, () => {
-      restoreFocusRef.current?.focus?.();
-      onClose();
-    });
-  };
 
   const meta: { label: string; value: string }[] = [
     project.language
@@ -120,7 +121,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-0 dark:backdrop-blur-sm sm:items-center sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
@@ -130,7 +131,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
-        className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-surface p-6 shadow-2xl sm:rounded-2xl sm:p-8"
+        className="card-glow max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-surface p-6 shadow-2xl sm:rounded-2xl sm:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div>

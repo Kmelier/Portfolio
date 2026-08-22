@@ -1,4 +1,5 @@
 import { profile } from "../config/profile";
+import { REQUEST_TIMEOUT_MS } from "./github";
 
 /** Lazy README preview (fetched only when a project modal opens). */
 
@@ -8,7 +9,7 @@ export async function fetchReadme(repo: string): Promise<string | null> {
       `https://api.github.com/repos/${profile.username}/${repo}/readme`,
       {
         headers: { Accept: "application/vnd.github.raw" },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       },
     );
     if (!res.ok) return null;

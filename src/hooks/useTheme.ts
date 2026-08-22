@@ -40,6 +40,8 @@ export function useTheme() {
           const themeMeta = document.querySelector<HTMLMetaElement>(
             'meta[name="theme-color"]',
           );
+          // Hexes mirror the --bg tokens in src/index.css (also see
+          // index.html and public/theme-init.js — update together).
           if (themeMeta) {
             themeMeta.content = next === "dark" ? "#0a0a0c" : "#f4f4fa";
           }

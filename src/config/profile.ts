@@ -8,14 +8,24 @@
  *    live from the API and never needs editing here.
  * ────────────────────────────────────────────────────────────────
  */
+export interface TaglineSegment {
+  text: string;
+  /** Highlighted words render with the gradient accent. */
+  highlight?: boolean;
+}
+
 export const profile = {
   name: "Chris Kmelier",
   username: "Kmelier",
 
   /** One-line intro used in the About section. */
   bio: "Tech enthusiast. I like contributing to random projects.",
-  /** Hero heading — {braces} mark the gradient-highlighted words. */
-  tagline: "I build things on {the web and beyond}.",
+  /** Hero heading, as segments — add/remove freely. */
+  tagline: [
+    { text: "I build things on " },
+    { text: "the web and beyond", highlight: true },
+    { text: "." },
+  ] satisfies TaglineSegment[],
 
   // Optional About-panel fields — fill in to show them:
   location: "",

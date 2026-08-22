@@ -83,7 +83,6 @@ export function Projects({ github }: ProjectsProps) {
   useEffect(() => {
     if (!gridInView || visible.length === 0) return;
     if (gridRef.current) staggerCards(gridRef.current.children, reduced);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gridInView, filter, projects]);
 
   const openProject = (project: Project) => {

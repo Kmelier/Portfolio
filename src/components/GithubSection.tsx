@@ -104,25 +104,17 @@ export function GithubSection({ github }: { github: GithubData }) {
                 label="Public repositories"
                 value={data.user.public_repos}
                 show
-                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
-              <StatTile
-                label="Total stars"
-                value={stars}
-                show={stars > 0}
-                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
-              />
+              <StatTile label="Total stars" value={stars} show={stars > 0} />
               <StatTile
                 label="Followers"
                 value={data.user.followers}
                 show={data.user.followers > 0}
-                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
               <StatTile
                 label="Following"
                 value={data.user.following}
                 show={data.user.following > 0}
-                className="tile rounded-xl border border-line bg-elevated px-4 py-4 text-center"
               />
             </div>
 

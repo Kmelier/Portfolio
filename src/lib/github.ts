@@ -85,7 +85,7 @@ export function isFresh(snapshot: GithubSnapshot): boolean {
   return Date.now() - snapshot.fetchedAt < CACHE_TTL;
 }
 
-const REQUEST_TIMEOUT_MS = 8000;
+export const REQUEST_TIMEOUT_MS = 8000;
 
 async function gh<T>(path: string): Promise<T> {
   const res = await fetch(`https://api.github.com${path}`, {

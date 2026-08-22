@@ -35,13 +35,7 @@ export function Achievements({ github }: { github: GithubData }) {
     >
       <div className="grid gap-4 sm:grid-cols-3">
         {candidates.map((c) => (
-          <StatTile
-            key={c.label}
-            label={c.label}
-            value={c.value}
-            className="card-glow rounded-2xl border border-line bg-surface px-6 py-8 text-center"
-            valueClassName="text-3xl font-semibold tracking-tight"
-          />
+          <StatTile key={c.label} label={c.label} value={c.value} variant="counter" />
         ))}
       </div>
     </section>
