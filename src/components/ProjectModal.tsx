@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ExternalLink, X } from "lucide-react";
 import { languageColor, timeAgo } from "../lib/format";
-import { fetchReadme, readmeToPlainText } from "../lib/readme";
+import { fetchReadme, parseReadme, type ReadmeBlock } from "../lib/readme";
 import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
@@ -15,6 +15,110 @@ interface ProjectModalProps {
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const INLINE_RE = /`([^`]+)`|\*\*([^*]+)\*\*|\[([^\]]+)\]\(([^)\s]+)\)/g;
+
+/** Inline markdown: `code`, **bold**, [links](url) — http(s) links only. */
+function Inline({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  let last = 0;
+  let key = 0;
+  let match: RegExpExecArray | null;
+  INLINE_RE.lastIndex = 0;
+  while ((match = INLINE_RE.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index));
+    if (match[1] !== undefined) {
+      parts.push(
+        <code
+          key={key++}
+          className="rounded bg-elevated px-1.5 py-0.5 font-mono text-[0.85em] text-fg"
+        >
+          {match[1]}
+        </code>,
+      );
+    } else if (match[2] !== undefined) {
+      parts.push(
+        <strong key={key++} className="font-semibold text-fg">
+          {match[2]}
+        </strong>,
+      );
+    } else {
+      const url = safeHttpUrl(match[4]);
+      parts.push(
+        url ? (
+          <a
+            key={key++}
+            href={url}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-accent hover:underline"
+          >
+            {match[3]}
+          </a>
+        ) : (
+          match[3]
+        ),
+      );
+    }
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return <>{parts}</>;
+}
+
+const HEADING_CLASSES: Record<1 | 2 | 3, string> = {
+  1: "mt-7 text-lg font-semibold tracking-tight text-fg",
+  2: "mt-6 text-base font-semibold tracking-tight text-fg",
+  3: "mt-5 text-sm font-semibold text-fg",
+};
+
+/** One parsed README block. */
+function ReadmeBlockView({ block }: { block: ReadmeBlock }) {
+  switch (block.type) {
+    case "heading":
+      return (
+        <p className={HEADING_CLASSES[block.level]}>
+          <Inline text={block.text} />
+        </p>
+      );
+    case "paragraph":
+      return (
+        <p>
+          <Inline text={block.text} />
+        </p>
+      );
+    case "list":
+      return block.ordered ? (
+        <ol className="list-decimal space-y-1.5 pl-5">
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <Inline text={item} />
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ul className="list-disc space-y-1.5 pl-5">
+          {block.items.map((item, i) => (
+            <li key={i}>
+              <Inline text={item} />
+            </li>
+          ))}
+        </ul>
+      );
+    case "code":
+      return (
+        <pre className="overflow-x-auto rounded-lg border border-line bg-elevated p-3.5 font-mono text-xs leading-relaxed text-fg">
+          <code>{block.text}</code>
+        </pre>
+      );
+    case "quote":
+      return (
+        <blockquote className="border-l-2 border-accent/50 pl-3 text-faint">
+          <Inline text={block.text} />
+        </blockquote>
+      );
+  }
+}
 
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
   const reduced = useReducedMotion();
@@ -87,13 +191,18 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     setReadmeState("loading");
     void fetchReadme(project.name).then((md) => {
       if (cancelled) return;
-      setReadme(md ? readmeToPlainText(md, Infinity) : null);
+      setReadme(md);
       setReadmeState("done");
     });
     return () => {
       cancelled = true;
     };
   }, [project?.name]);
+
+  const readmeBlocks = useMemo(
+    () => (readme ? parseReadme(readme) : []),
+    [readme],
+  );
 
   if (!project) return null;
 
@@ -239,12 +348,14 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
               <div className="skeleton h-3 w-2/3" />
             </div>
           )}
-          {readmeState === "done" && readme && (
-            <p className="mt-4 whitespace-pre-line font-mono text-[13px] leading-relaxed text-muted">
-              {readme}
-            </p>
+          {readmeState === "done" && readmeBlocks.length > 0 && (
+            <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted">
+              {readmeBlocks.map((block, i) => (
+                <ReadmeBlockView key={i} block={block} />
+              ))}
+            </div>
           )}
-          {readmeState === "done" && !readme && (
+          {readmeState === "done" && readmeBlocks.length === 0 && (
             <p className="mt-4 text-sm text-faint">No README found.</p>
           )}
         </div>
