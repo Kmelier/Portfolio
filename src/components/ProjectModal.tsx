@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, X } from "lucide-react";
-import { languageColor, timeAgo } from "../lib/format";
+import { languageColor } from "../lib/format";
 import { fetchReadme, readmeToPlainText } from "../lib/readme";
 import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
@@ -99,30 +99,6 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
 
   const liveUrl = safeHttpUrl(project.homepage);
 
-  // Only meaningful values get tiles — zero/None stats stay hidden
-  // until they're real (same philosophy as the site's other stats).
-  const meta: { label: string; value: string }[] = [];
-  if (project.language) {
-    meta.push({ label: "Language", value: project.language });
-  }
-  if (project.stargazers_count > 0) {
-    meta.push({ label: "Stars", value: String(project.stargazers_count) });
-  }
-  if (project.forks_count > 0) {
-    meta.push({ label: "Forks", value: String(project.forks_count) });
-  }
-  meta.push({ label: "Updated", value: timeAgo(project.pushed_at) });
-  meta.push({
-    label: "Created",
-    value: new Date(project.created_at).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-    }),
-  });
-  if (project.license?.spdx_id && project.license.spdx_id !== "NOASSERTION") {
-    meta.push({ label: "License", value: project.license.spdx_id });
-  }
-
   return (
     <div
       ref={backdropRef}
@@ -187,20 +163,6 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </span>
               )}
         </div>
-
-        <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {meta.map((item) => (
-            <div
-              key={item.label}
-              className="tile rounded-xl border border-line bg-elevated px-3.5 py-3"
-            >
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-faint">
-                {item.label}
-              </dt>
-              <dd className="mt-1 truncate text-sm font-medium">{item.value}</dd>
-            </div>
-          ))}
-        </dl>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <a
