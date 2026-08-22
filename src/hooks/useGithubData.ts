@@ -8,6 +8,18 @@ import {
 
 export type GithubStatus = "loading" | "ready" | "error";
 
+/** Share one in-flight request across hook instances / effect re-runs. */
+let inflight: Promise<GithubSnapshot> | null = null;
+
+function fetchOnce(): Promise<GithubSnapshot> {
+  if (!inflight) {
+    inflight = fetchGithubData().finally(() => {
+      inflight = null;
+    });
+  }
+  return inflight;
+}
+
 /**
  * GitHub data with stale-while-revalidate caching:
  *  - cached data renders immediately
@@ -28,7 +40,7 @@ export function useGithubData() {
       if (isFresh(cached)) return;
     }
     try {
-      const fresh = await fetchGithubData();
+      const fresh = await fetchOnce();
       setData(fresh);
       setStatus("ready");
     } catch {

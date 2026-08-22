@@ -37,6 +37,12 @@ export function useTheme() {
         const apply = () => {
           root.classList.toggle("dark", next === "dark");
           root.style.colorScheme = next;
+          const themeMeta = document.querySelector<HTMLMetaElement>(
+            'meta[name="theme-color"]',
+          );
+          if (themeMeta) {
+            themeMeta.content = next === "dark" ? "#0a0a0c" : "#f4f4fa";
+          }
           try {
             localStorage.setItem(STORAGE_KEY, next);
           } catch {

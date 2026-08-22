@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Warm up the GitHub API + avatar origins before React asks for them -->
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <link rel="preconnect" href="https://avatars.githubusercontent.com" />
+
+    <!-- Browser chrome color, kept in sync with the active theme -->
+    <meta name="theme-color" content="#0a0a0c" />
+
     <title>Chris Kmelier — Developer Portfolio</title>
     <meta
       name="description"
@@ -41,6 +48,8 @@
           var dark = stored ? stored === "dark" : !mql.matches;
           document.documentElement.classList.toggle("dark", dark);
           document.documentElement.style.colorScheme = dark ? "dark" : "light";
+          var themeMeta = document.querySelector('meta[name="theme-color"]');
+          if (themeMeta) themeMeta.setAttribute("content", dark ? "#0a0a0c" : "#f4f4fa");
         } catch (e) {
           /* dark stays applied */
         }
