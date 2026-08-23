@@ -21,10 +21,16 @@
 }
 
 /* ── Theme tokens: light ("indigo daylight" — tinted neutrals) ── */
-/* The --bg hexes mirror literal colors in index.html (theme-color),
-   public/theme-init.js and src/hooks/useTheme.ts — update together. */
+/* Both backgrounds are exposed unconditionally so JS can read either
+   one without repeating the hexes (the theme reveal and the
+   theme-color meta both do). The only other copies are the pre-paint
+   bootstraps that run before this stylesheet applies: index.html
+   (theme-color) and public/theme-init.js — update those together. */
 :root {
-  --bg: #f4f4fa;
+  --bg-light: #f4f4fa;
+  --bg-dark: #0a0a0c;
+
+  --bg: var(--bg-light);
   --surface: #ffffff;
   --elevated: #ededf6;
   --line: #e3e3ef;
@@ -41,7 +47,7 @@
 
 /* ── Theme tokens: dark (default, near-black) ─────────────────── */
 .dark {
-  --bg: #0a0a0c;
+  --bg: var(--bg-dark);
   --surface: #101014;
   --elevated: #17171c;
   --line: #232329;
@@ -122,32 +128,9 @@
   }
 }
 
-/* ── Theme transitions ──────────────────────────────────────────
-   Primary: circular reveal via the View Transitions API (driven in
-   useTheme). Fallback: brief cross-fade of themed properties.     */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}
-::view-transition-new(root) {
-  z-index: 2147483647;
-}
-
-html.theme-transition,
-html.theme-transition *,
-html.theme-transition *::before,
-html.theme-transition *::after {
-  transition:
-    background-color 0.35s ease,
-    border-color 0.35s ease,
-    color 0.35s ease,
-    fill 0.35s ease,
-    box-shadow 0.35s ease !important;
-}
+/* Theme switching is animated entirely from JS by src/lib/themeReveal.ts
+   (one composited disc), so there is deliberately no CSS here — no
+   `::view-transition-*` rules and no page-wide property transition. */
 
 /* ── Hero heading words (Anime.js staggered entrance) ─────────── */
 .hero-word {

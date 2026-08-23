@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useReducedMotion } from "./useReducedMotion";
+import { themeReveal } from "../lib/themeReveal";
 
 export type Theme = "dark" | "light";
 export interface ThemeOrigin {
@@ -9,18 +10,28 @@ export interface ThemeOrigin {
 
 const STORAGE_KEY = "kmelier:theme";
 
-interface ViewTransitionLike {
-  ready: Promise<void>;
-  finished?: Promise<void>;
+/**
+ * A theme's `--bg`, read from CSS rather than repeated here. Both values
+ * are exposed unconditionally as `--bg-light` / `--bg-dark` in
+ * src/index.css, so that file stays the single source for them.
+ *
+ * Empty means stylesheets have not applied — the caller then flips
+ * instantly rather than animating a transparent disc.
+ */
+function backgroundFor(theme: Theme): string {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(theme === "dark" ? "--bg-dark" : "--bg-light")
+    .trim();
 }
 
 /**
- * Theme state. The initial class was already applied by the inline
- * script in index.html, so there is no flash of the wrong theme.
+ * Theme state. The initial class was already applied by
+ * public/theme-init.js, so there is no flash of the wrong theme.
  *
- * Toggling uses the View Transitions API to reveal the new theme as a
- * circle expanding from the toggle button; browsers without support
- * (or users preferring reduced motion) get a color cross-fade instead.
+ * Toggling reveals the new theme as a circle expanding from the point
+ * that triggered it — see src/lib/themeReveal.ts for why it is built
+ * from a plain scaled div rather than the View Transitions API. Users
+ * who prefer reduced motion get an instant swap.
  */
 export function useTheme() {
   const reduced = useReducedMotion();
@@ -30,75 +41,40 @@ export function useTheme() {
 
   const toggle = useCallback(
     (origin?: ThemeOrigin) => {
-      setTheme((prev) => {
-        const next: Theme = prev === "dark" ? "light" : "dark";
-        const root = document.documentElement;
+      const next: Theme = theme === "dark" ? "light" : "dark";
+      const root = document.documentElement;
+      const background = backgroundFor(next);
 
-        const apply = () => {
-          root.classList.toggle("dark", next === "dark");
-          root.style.colorScheme = next;
-          const themeMeta = document.querySelector<HTMLMetaElement>(
-            'meta[name="theme-color"]',
-          );
-          // Hexes mirror the --bg tokens in src/index.css (also see
-          // index.html and public/theme-init.js — update together).
-          if (themeMeta) {
-            themeMeta.content = next === "dark" ? "#0a0a0c" : "#f4f4fa";
-          }
-          try {
-            localStorage.setItem(STORAGE_KEY, next);
-          } catch {
-            /* storage unavailable — theme just won't persist */
-          }
-        };
-
-        const doc = document as Document & {
-          startViewTransition?: (cb: () => void) => ViewTransitionLike;
-        };
-
-        if (!reduced && origin && typeof doc.startViewTransition === "function") {
-          const transition = doc.startViewTransition(apply);
-          // Guard both promises so a skipped transition never rejects
-          // unhandled or lingers past its cleanup.
-          transition.ready
-            .then(() => {
-              const radius = Math.hypot(
-                Math.max(origin.x, window.innerWidth - origin.x),
-                Math.max(origin.y, window.innerHeight - origin.y),
-              );
-              const options = {
-                duration: 500,
-                easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-                pseudoElement: "::view-transition-new(root)",
-              } as KeyframeAnimationOptions;
-              root.animate(
-                {
-                  clipPath: [
-                    `circle(0px at ${origin.x}px ${origin.y}px)`,
-                    `circle(${radius}px at ${origin.x}px ${origin.y}px)`,
-                  ],
-                },
-                options,
-              );
-            })
-            .catch(() => {
-              /* transition skipped — the theme still applied */
-            });
-          transition.finished?.catch(() => {
-            /* cleanup is the browser's job; never reject unhandled */
-          });
-        } else {
-          root.classList.add("theme-transition");
-          apply();
-          window.setTimeout(
-            () => root.classList.remove("theme-transition"),
-            400,
-          );
+      const apply = () => {
+        root.classList.toggle("dark", next === "dark");
+        root.style.colorScheme = next;
+        const themeMeta = document.querySelector<HTMLMetaElement>(
+          'meta[name="theme-color"]',
+        );
+        if (themeMeta && background) themeMeta.content = background;
+        try {
+          localStorage.setItem(STORAGE_KEY, next);
+        } catch {
+          /* storage unavailable — theme just won't persist */
         }
-        return next;
-      });
+      };
+
+      setTheme(next);
+
+      if (reduced || !background) {
+        apply();
+        return;
+      }
+      themeReveal(
+        origin ?? {
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
+        },
+        background,
+        apply,
+      );
     },
-    [reduced],
+    [theme, reduced],
   );
 
   return { theme, toggle };

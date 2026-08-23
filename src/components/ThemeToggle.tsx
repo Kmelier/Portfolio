@@ -29,7 +29,15 @@ export function ThemeToggleButton({
       type="button"
       data-spring
       onClick={(e) => {
-        onToggleTheme({ x: e.clientX, y: e.clientY });
+        // Keyboard activation reports clientX/clientY as 0 (detail 0),
+        // which would start the reveal from the top-left corner instead
+        // of the button.
+        const rect = e.currentTarget.getBoundingClientRect();
+        onToggleTheme(
+          e.detail === 0
+            ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+            : { x: e.clientX, y: e.clientY },
+        );
         iconPop(iconRef.current, reduced);
       }}
       aria-label={
