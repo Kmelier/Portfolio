@@ -34,18 +34,34 @@
       property="og:description"
       content="Tech enthusiast building useful, experimental and creative projects. Projects, skills and GitHub activity, always in sync."
     />
-    <meta property="og:image" content="https://avatars.githubusercontent.com/u/318184274?v=4" />
+    <!-- Real 1200x630 social card (public/og.png), not the square GitHub
+         avatar this used to point at: every platform crops a square to
+         its own 1.91:1 card, so the avatar was arriving letterboxed or
+         centre-cropped depending on who unfurled the link. Absolute URL
+         because crawlers do not resolve relative paths here. -->
+    <meta property="og:image" content="https://kmelier.vercel.app/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Chris Kmelier — I build things on the web and beyond. kmelier.vercel.app"
+    />
     <meta property="og:url" content="https://kmelier.vercel.app" />
     <meta property="og:site_name" content="Kmelier" />
 
     <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Chris Kmelier — Developer Portfolio" />
     <meta
       name="twitter:description"
       content="Tech enthusiast building useful, experimental and creative projects. Projects, skills and GitHub activity, always in sync."
     />
-    <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/318184274?v=4" />
+    <meta name="twitter:image" content="https://kmelier.vercel.app/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Chris Kmelier — I build things on the web and beyond. kmelier.vercel.app"
+    />
 
     <script src="/theme-init.js"></script>
   </head>
