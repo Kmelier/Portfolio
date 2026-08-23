@@ -6,10 +6,11 @@ import {
   Star,
   type LucideIcon,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { GithubData } from "../hooks/useGithubData";
 import { useReveal } from "../hooks/useReveal";
-import { timeAgo } from "../lib/format";import {
+import { timeAgo } from "../lib/format";
+import {
   describeEvents,
   totalStars,
   type ActivityItem,
@@ -76,6 +77,7 @@ function buildHeatmap(events: { created_at: string }[]): HeatmapCell[][] {
 export function GithubSection({ github }: { github: GithubData }) {
   const { status, data } = github;
   const { ref, revealClass } = useReveal<HTMLDivElement>();
+  const [readout, setReadout] = useState<string | null>(null);
 
   const stars = data ? totalStars(data.repos) : 0;
   const activity = data ? describeEvents(data.events).slice(0, 5) : [];
@@ -212,21 +214,46 @@ export function GithubSection({ github }: { github: GithubData }) {
                 <h3 className="font-mono text-xs font-medium uppercase tracking-[0.2em] text-faint">
                   Last {HEATMAP_WEEKS} weeks
                 </h3>
-                <div className="mt-4 flex gap-[3px] overflow-x-auto">
+                {/* `title` renders as a hover tooltip, and a touchscreen
+                    has no hover — so on a phone the per-day counts were
+                    simply unreadable. One delegated listener puts the
+                    tapped day into the caption below instead. Deliberately
+                    on the container: making all 84 cells buttons would add
+                    84 tab stops in front of the next real control, for
+                    what is a decorative graphic. */}
+                <div
+                  aria-hidden
+                  onClick={(e) => {
+                    const cell = (e.target as HTMLElement).closest<HTMLElement>(
+                      "[data-day]",
+                    );
+                    if (cell) setReadout(cell.dataset.day ?? null);
+                  }}
+                  className="mt-4 flex gap-[3px] overflow-x-auto"
+                >
                   {heatmap.map((week, wi) => (
                     <div key={wi} className="flex flex-col gap-[3px]">
                       {week.map((cell) => (
                         <span
                           key={cell.key}
                           title={cell.title}
-                          className={`h-2.5 w-2.5 shrink-0 rounded-[3px] ${HEATMAP_LEVELS[cell.level]}`}
+                          data-day={cell.title}
+                          // 14px where the cell is also the tap target;
+                          // the denser rem-based desktop cell is unchanged.
+                          // 12 columns of 14px + 11 gaps still measures
+                          // 201px inside a 298px card at 390px.
+                          className={`h-[14px] w-[14px] shrink-0 rounded-[3px] sm:h-2.5 sm:w-2.5 ${HEATMAP_LEVELS[cell.level]}`}
                         />
                       ))}
                     </div>
                   ))}
                 </div>
-                <p className="mt-3 font-mono text-[11px] text-faint">
-                  Live from the events API — fills in as GitHub is used.
+                <p
+                  aria-live="polite"
+                  className="mt-3 font-mono text-[11px] text-faint"
+                >
+                  {readout ??
+                    "Live from the events API — fills in as GitHub is used."}
                 </p>
               </div>
             )}

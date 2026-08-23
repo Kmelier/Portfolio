@@ -39,7 +39,12 @@ export function Section({
   return (
     <section
       id={id}
-      className={`cv-auto relative mx-auto max-w-6xl px-6 py-24 sm:py-28 ${className}`}
+      // py-24 -> py-16 below 640px only. This is what funds the bigger
+      // root font-size: 6rem of vertical air above and below every
+      // section is a desktop proportion, and on a 390x844 screen it
+      // meant a third of the viewport was empty on arrival at each one.
+      // Desktop keeps sm:py-28 exactly as it was.
+      className={`cv-auto relative mx-auto max-w-6xl px-6 py-16 sm:py-28 ${className}`}
     >
       {children}
     </section>

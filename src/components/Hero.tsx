@@ -182,7 +182,10 @@ export function Hero() {
 
       <div
         ref={contentRef}
-        className="relative mx-auto max-w-3xl px-6 pb-28 pt-28 text-center sm:pt-36"
+        // Same trade as Section: 7rem of padding top and bottom pushed
+        // the CTAs under the fold on a short phone, so the first thing
+        // you saw was a heading with nothing actionable beneath it.
+        className="relative mx-auto max-w-3xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-36"
       >
         <p
           ref={labelRef}

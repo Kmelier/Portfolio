@@ -13,6 +13,10 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onOpen }: ProjectCardProps) {
   const reduced = useReducedMotion();
+  // Three topics is one row on a desktop card and two crowded rows on a
+  // 390px one. The third is rendered and hidden by CSS rather than sliced
+  // off in JS, so there is one DOM tree for both widths — a JS slice would
+  // need a viewport hook and would then have to survive rotation.
   const tags = project.topics.slice(0, 3);
   const liveUrl = safeHttpUrl(project.homepage);
 
@@ -20,7 +24,7 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
     <article
       onMouseEnter={(e) => cardSpringIn(e.currentTarget, reduced)}
       onMouseLeave={(e) => cardSpringOut(e.currentTarget, reduced)}
-      className={`card-glow group relative flex h-full flex-col rounded-2xl p-5 ${
+      className={`card-glow group relative flex h-full flex-col rounded-2xl p-4 sm:p-5 ${
         project.featured ? "gradient-border" : "border border-line bg-surface"
       }`}
     >
@@ -80,10 +84,12 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
           </span>
         )}
         {tags.length > 0
-          ? tags.map((topic) => (
+          ? tags.map((topic, i) => (
               <span
                 key={topic}
-                className="rounded-md border border-line bg-elevated px-2 py-0.5 font-mono text-[11px] text-faint"
+                className={`rounded-md border border-line bg-elevated px-2 py-0.5 font-mono text-[11px] text-faint ${
+                  i === 2 ? "hidden sm:inline" : ""
+                }`}
               >
                 {topic}
               </span>
@@ -93,7 +99,11 @@ export function ProjectCard({ project, onOpen }: ProjectCardProps) {
                 {project.language.toLowerCase()}
               </span>
             )}
-        <span className="ml-auto inline-flex items-center gap-3 font-mono text-xs text-faint">
+        {/* sm:ml-auto, not ml-auto: on a narrow card this row wraps, and
+            an auto margin on a wrapped flex item throws the star/fork
+            counts to the far right of a line of their own instead of
+            letting them sit with the tags. */}
+        <span className="inline-flex items-center gap-3 font-mono text-xs text-faint sm:ml-auto">
           <span className="inline-flex items-center gap-1" title="Stars">
             <Star className="h-3.5 w-3.5" />
             {project.stargazers_count}
