@@ -64,6 +64,14 @@ export default defineConfig({
           ) {
             return "react";
           }
+          // Anime.js is dynamically imported behind src/lib/anime.ts and
+          // has to stay out of the eager vendor chunk. Naming it here
+          // would defeat the split outright: a manual assignment wins
+          // over the async boundary, so the whole engine would land back
+          // on the critical path while still paying for the extra chunk.
+          if (id.includes("/node_modules/animejs/")) {
+            return undefined;
+          }
           return "vendor";
         },
       },

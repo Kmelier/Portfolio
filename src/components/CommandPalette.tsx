@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { animate, stagger } from "animejs";
 import {
   ArrowRight,
   Check,
@@ -15,7 +14,7 @@ import { profile } from "../config/profile";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { useScrollLock } from "../hooks/useScrollLock";
-import { modalIn, modalOut } from "../lib/animations";
+import { modalIn, modalOut, paletteList } from "../lib/animations";
 import type { Project } from "../lib/github";
 import { GithubIcon } from "./icons";
 
@@ -192,15 +191,7 @@ export function CommandPalette({
   // Stagger rows in on open and on every query change
   useEffect(() => {
     if (!mounted || !open || reduced) return;
-    if (listRef.current) {
-      animate(listRef.current.querySelectorAll("li"), {
-        opacity: [0, 1],
-        translateY: [6, 0],
-        duration: 260,
-        ease: "outExpo",
-        delay: stagger(22),
-      });
-    }
+    if (listRef.current) paletteList(listRef.current);
   }, [mounted, open, query, reduced]);
 
   useEffect(() => {

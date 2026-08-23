@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { animate, stagger } from "animejs";
 import { Search } from "lucide-react";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { profile } from "../config/profile";
 import { NAV_ITEMS } from "../config/navigation";
+import { menuIn, menuOut } from "../lib/animations";
 import { ThemeToggleButton, iconButtonClass } from "./ThemeToggle";
 import { GithubIcon } from "./icons";
 
@@ -139,13 +139,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
       setMenuMounted(false);
       return;
     }
-    animate(nav, {
-      opacity: [1, 0],
-      translateY: [0, -8],
-      duration: 220,
-      ease: "inQuad",
-      onComplete: () => setMenuMounted(false),
-    });
+    menuOut(nav, () => setMenuMounted(false));
   }, [menuOpen, menuMounted, reduced]);
 
   // Runs after the mounted nav actually exists
@@ -153,19 +147,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
     if (!menuOpen || !menuMounted) return;
     const nav = menuRef.current;
     if (!nav || reduced) return;
-    animate(nav, {
-      opacity: [0, 1],
-      translateY: [-10, 0],
-      duration: 320,
-      ease: "outExpo",
-    });
-    animate(nav.querySelectorAll("a, button"), {
-      opacity: [0, 1],
-      translateX: [-12, 0],
-      duration: 380,
-      ease: "outExpo",
-      delay: stagger(45, { start: 60 }),
-    });
+    menuIn(nav);
   }, [menuOpen, menuMounted, reduced]);
 
   return (

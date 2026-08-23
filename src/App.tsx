@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "./hooks/useTheme";
 import { useGithubData } from "./hooks/useGithubData";
 import { useEasterEgg } from "./hooks/useEasterEgg";
-import { attachSpringHover } from "./lib/animations";
+import { attachSpringHover, warmAnimations } from "./lib/animations";
 import { organizeProjects } from "./lib/github";
 import { Navbar } from "./components/Navbar";
 import { Hero } from "./components/Hero";
@@ -24,6 +24,21 @@ export default function App() {
 
   // One delegated listener set powers every [data-spring] control
   useEffect(() => attachSpringHover(), []);
+
+  // Anime.js is a lazy chunk (see src/lib/animations.ts) — pulled in here
+  // once the browser is idle, so it is warm before the first hover, tap or
+  // scroll-reveal needs it without ever competing with hydration or the
+  // GitHub fetch for the main thread. `requestIdleCallback` is still
+  // missing on Safari before 17.4, hence the timeout fallback.
+  useEffect(() => {
+    const idle = window.requestIdleCallback;
+    if (idle) {
+      const handle = idle(() => warmAnimations(), { timeout: 2500 });
+      return () => window.cancelIdleCallback?.(handle);
+    }
+    const t = window.setTimeout(warmAnimations, 1200);
+    return () => window.clearTimeout(t);
+  }, []);
 
   // ⌘K / Ctrl+K toggles the command palette
   useEffect(() => {
