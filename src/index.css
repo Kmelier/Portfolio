@@ -144,12 +144,197 @@
    (one composited disc), so there is deliberately no CSS here — no
    `::view-transition-*` rules and no page-wide property transition. */
 
-/* ── Hero heading words (Anime.js staggered entrance) ─────────── */
+/* ── Easings sampled from Anime.js's own solvers ───────────────────
+   Generated once by running the library's `eases.outExpo`,
+   `eases.inOutSine` and `spring({bounce: 0.4, duration: 550})` across
+   the unit interval and printing the results as `linear()` stops, so a
+   CSS animation using them is indistinguishable from the JS one it
+   replaced — including the spring's overshoot to 1.094 at the quarter
+   mark, which no cubic-bezier can express (a bezier easing is bounded
+   by its endpoints; `linear()` is not). Resolution is per-curve: the
+   spring needs 48 stops to keep its bounce smooth, the two monotonic
+   curves are already sub-pixel at 20 and 16. */
+:root {
+  --ease-out-expo: linear(
+    0, 0.2929 5%, 0.5 10%, 0.6464 15%, 0.75 20%, 0.8232 25%, 0.875 30%,
+    0.9116 35%, 0.9375 40%, 0.9558 45%, 0.9688 50%, 0.9779 55%, 0.9844 60%,
+    0.989 65%, 0.9922 70%, 0.9945 75%, 0.9961 80%, 0.9972 85%, 0.998 90%,
+    0.9986 95%, 1
+  );
+  --ease-in-out-sine: linear(
+    0, 0.0096 6.25%, 0.0381 12.5%, 0.0843 18.75%, 0.1464 25%, 0.2222 31.25%,
+    0.3087 37.5%, 0.4025 43.75%, 0.5 50%, 0.5975 56.25%, 0.6913 62.5%,
+    0.7778 68.75%, 0.8536 75%, 0.9157 81.25%, 0.9619 87.5%, 0.9904 93.75%, 1
+  );
+  --ease-spring-words: linear(
+    0, 0.0446 2.0833%, 0.155 4.1667%, 0.3012 6.25%, 0.4594 8.3333%,
+    0.6126 10.4167%, 0.7496 12.5%, 0.864 14.5833%, 0.9534 16.6667%,
+    1.0183 18.75%, 1.061 20.8333%, 1.085 22.9167%, 1.0943 25%, 1.0927 27.0833%,
+    1.0839 29.1667%, 1.0708 31.25%, 1.0559 33.3333%, 1.0411 35.4167%,
+    1.0276 37.5%, 1.016 39.5833%, 1.0068 41.6667%, 1 43.75%, 0.9953 45.8333%,
+    0.9925 47.9167%, 0.9912 50%, 0.9911 52.0833%, 0.9917 54.1667%,
+    0.9929 56.25%, 0.9942 58.3333%, 0.9957 60.4167%, 0.997 62.5%,
+    0.9982 64.5833%, 0.9991 66.6667%, 0.9998 68.75%, 1.0003 70.8333%,
+    1.0006 72.9167%, 1.0008 75%, 1.0009 77.0833%, 1.0008 79.1667%,
+    1.0007 81.25%, 1.0006 83.3333%, 1.0005 85.4167%, 1.0003 87.5%,
+    1.0002 89.5833%, 1.0001 91.6667%, 1 93.75%, 1 95.8333%, 0.9999 97.9167%, 1
+  );
+}
+
+/* ── Hero entrance, floats and caret ───────────────────────────────
+   These used to be Anime.js animations kicked off from Hero's mount
+   effect, which had two costs. The cheap one: 39 kB of animation engine
+   on the critical path. The expensive one: every element here shipped
+   with `opacity: 0` and was only revealed once React had hydrated, so
+   the hero was a blank box until the main thread finished the busiest
+   moment of the page — hydration plus the first GitHub fetch — and then
+   the entrance itself was driven frame-by-frame from JS, competing with
+   that same work. On a mid-range phone that is exactly where the "laggy"
+   feeling came from.
+
+   As CSS the whole sequence starts at first paint with no JS at all and
+   runs on the compositor. The timings and easings are not re-invented:
+   the `linear()` curves below are sampled from Anime.js's own solvers
+   (`eases.outExpo`, `eases.inOutSine`, and `spring({bounce: .4,
+   duration: 550})`), and the delays are the resolved absolute times of
+   the old timeline — so the choreography is unchanged, frame for frame.
+
+   Why 1340ms for the words: a spring easing overrides whatever duration
+   you hand the animation with its own settling time, so the old
+   `duration: 700` was never in effect. The visible motion is over by
+   ~600ms; the rest is the tail settling within a thousandth of 1.
+
+   `animation-fill-mode: backwards` and not `forwards`, deliberately:
+   backwards holds the hidden `from` state through the delay, then hands
+   the properties back to the base styles once the run ends. Forwards
+   would leave the animation pinned at its end frame, and the animation
+   origin outranks inline styles in the cascade — the magnetic-cursor
+   effect writes `transform` on the primary CTA and would have been
+   silently ignored for the rest of the session. Movement uses the
+   standalone `translate` property for the same reason: it cannot
+   collide with anything writing `transform`. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero-anim :is(.hero-label, .hero-sub, .hero-cta, .hero-word) {
+    animation-name: hero-in;
+    animation-fill-mode: backwards;
+    animation-timing-function: var(--ease-out-expo);
+  }
+
+  .hero-anim .hero-label {
+    --hero-rise: 14px;
+    animation-duration: 900ms;
+    animation-delay: 100ms;
+  }
+  .hero-anim .hero-sub {
+    --hero-rise: 18px;
+    animation-duration: 900ms;
+    animation-delay: 550ms;
+  }
+  .hero-anim .hero-cta {
+    --hero-rise: 12px;
+    animation-duration: 900ms;
+    animation-delay: 850ms;
+  }
+  .hero-anim .hero-cta:nth-of-type(2) {
+    animation-delay: 960ms;
+  }
+
+  /* Word stagger: 350ms lead-in, then 65ms apart. Written out rather
+     than derived, because the heading is built from config and CSS has
+     no way to count what it is handed. Twelve covers the tagline with
+     room to spare; a thirteenth word would simply share the last delay,
+     which is a stagger that stops widening — not a broken animation. */
+  .hero-anim .hero-word {
+    --hero-rise: 32px;
+    animation-duration: 1340ms;
+    animation-timing-function: var(--ease-spring-words);
+    animation-delay: 350ms;
+  }
+  .hero-anim span:nth-child(2) .hero-word { animation-delay: 415ms; }
+  .hero-anim span:nth-child(3) .hero-word { animation-delay: 480ms; }
+  .hero-anim span:nth-child(4) .hero-word { animation-delay: 545ms; }
+  .hero-anim span:nth-child(5) .hero-word { animation-delay: 610ms; }
+  .hero-anim span:nth-child(6) .hero-word { animation-delay: 675ms; }
+  .hero-anim span:nth-child(7) .hero-word { animation-delay: 740ms; }
+  .hero-anim span:nth-child(8) .hero-word { animation-delay: 805ms; }
+  .hero-anim span:nth-child(9) .hero-word { animation-delay: 870ms; }
+  .hero-anim span:nth-child(10) .hero-word { animation-delay: 935ms; }
+  .hero-anim span:nth-child(11) .hero-word { animation-delay: 1000ms; }
+  .hero-anim span:nth-child(n + 12) .hero-word { animation-delay: 1065ms; }
+
+  /* Background fragments and the terminal caret: infinite loops, so
+     they are the one thing here that keeps costing something after the
+     entrance. Hero's IntersectionObserver adds `hero-idle` once the
+     section leaves the viewport, which parks them rather than leaving
+     the compositor ticking six animations behind the rest of the page. */
+  .hero-float {
+    animation-name: hero-float;
+    animation-timing-function: var(--ease-in-out-sine);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+  }
+  .hero-float-1 { --fx: 6px;  --fy: -8px;  animation-duration: 2800ms; }
+  .hero-float-2 { --fx: -6px; --fy: -12px; animation-duration: 3250ms; animation-delay: 320ms; }
+  .hero-float-3 { --fx: 6px;  --fy: -16px; animation-duration: 3700ms; animation-delay: 640ms; }
+  .hero-float-4 { --fx: -6px; --fy: -8px;  animation-duration: 4150ms; animation-delay: 960ms; }
+  .hero-float-5 { --fx: 6px;  --fy: -12px; animation-duration: 4600ms; animation-delay: 1280ms; }
+
+  .hero-caret {
+    animation: hero-caret 960ms linear infinite;
+  }
+
+  .hero-idle :is(.hero-float, .hero-caret) {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--hero-rise, 16px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes hero-float {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: var(--fx) var(--fy);
+  }
+}
+
+@keyframes hero-caret {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
 .hero-word {
   display: inline-block;
 }
-.pre-words .hero-word {
-  opacity: 0;
+
+/* Active-nav-link indicator. `left` and `width` are layout properties,
+   so this transition is not free — but it replaces a JS tween of the
+   same two properties, which paid the same layout cost plus a
+   main-thread tick per frame. Opacity is faster than the slide on
+   purpose: it only ever runs when there is no active section to point
+   at, and a 400ms fade on a 2px bar reads as a hang. */
+@media (prefers-reduced-motion: no-preference) {
+  .nav-indicator {
+    transition:
+      left 400ms var(--ease-out-expo),
+      width 400ms var(--ease-out-expo),
+      opacity 200ms var(--ease-out-expo);
+  }
 }
 
 /* ── Faint technical grid background ──────────────────────────── */

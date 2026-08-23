@@ -73,30 +73,29 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
     return () => io.disconnect();
   }, []);
 
-  // Sliding gradient indicator under the active nav link
+  // Sliding gradient indicator under the active nav link.
+  //
+  // The slide is a CSS transition on the element itself (`.nav-indicator`)
+  // rather than an Anime.js tween of the same three properties. It is the
+  // only animation in this file that ran on mount, so moving it out is
+  // what lets Anime.js load lazily — and animating `left`/`width` from JS
+  // meant a layout on every frame of the slide, which the transition also
+  // does but without a main-thread tick driving it. Reduced motion is
+  // handled by the media query around that rule, so both branches here
+  // collapse into plain style writes.
   useEffect(() => {
     const indicator = indicatorRef.current;
     if (!indicator) return;
     const idx = NAV_ITEMS.findIndex((i) => i.id === active);
     const link = idx >= 0 ? linkRefs.current[idx] : null;
     if (!link) {
-      if (!reduced) animate(indicator, { opacity: 0, duration: 200 });
+      indicator.style.opacity = "0";
       return;
     }
-    if (reduced) {
-      indicator.style.left = `${link.offsetLeft}px`;
-      indicator.style.width = `${link.offsetWidth}px`;
-      indicator.style.opacity = "1";
-      return;
-    }
-    animate(indicator, {
-      left: link.offsetLeft,
-      width: link.offsetWidth,
-      opacity: 1,
-      duration: 400,
-      ease: "outExpo",
-    });
-  }, [active, reduced]);
+    indicator.style.left = `${link.offsetLeft}px`;
+    indicator.style.width = `${link.offsetWidth}px`;
+    indicator.style.opacity = "1";
+  }, [active]);
 
   // Keep the indicator glued to its link across resizes
   useEffect(() => {
@@ -105,8 +104,14 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
       const idx = NAV_ITEMS.findIndex((i) => i.id === active);
       const link = idx >= 0 ? linkRefs.current[idx] : null;
       if (indicator && link) {
+        // Snap rather than slide: mid-drag the transition would leave the
+        // indicator trailing 400ms behind the link it belongs to.
+        indicator.style.transitionDuration = "0s";
         indicator.style.left = `${link.offsetLeft}px`;
         indicator.style.width = `${link.offsetWidth}px`;
+        requestAnimationFrame(() => {
+          indicator.style.transitionDuration = "";
+        });
       }
     };
     window.addEventListener("resize", onResize);
@@ -212,7 +217,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
           <span
             ref={indicatorRef}
             aria-hidden
-            className="absolute -bottom-[9px] left-0 h-[2px] rounded-full bg-gradient-to-r from-accent to-accent-2"
+            className="nav-indicator absolute -bottom-[9px] left-0 h-[2px] rounded-full bg-gradient-to-r from-accent to-accent-2"
             style={{ width: 0, opacity: 0 }}
           />
         </ul>

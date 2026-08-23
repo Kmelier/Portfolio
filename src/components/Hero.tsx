@@ -1,12 +1,6 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
-import {
-  attachMagnetic,
-  blinkCaret,
-  heroEntrance,
-  startFloat,
-  type PausableAnimation,
-} from "../lib/animations";
+import { attachMagnetic } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { profile } from "../config/profile";
 import { GithubIcon } from "./icons";
@@ -37,13 +31,7 @@ function Tagline() {
 
 export function Hero() {
   const reduced = useReducedMotion();
-  const labelRef = useRef<HTMLParagraphElement | null>(null);
-  const caretRef = useRef<HTMLSpanElement | null>(null);
-  const headingRef = useRef<HTMLHeadingElement | null>(null);
-  const subRef = useRef<HTMLParagraphElement | null>(null);
   const primaryRef = useRef<HTMLAnchorElement | null>(null);
-  const buttonRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const floatRefs = useRef<(HTMLElement | null)[]>([]);
   const contentRef = useRef<HTMLDivElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -55,41 +43,23 @@ export function Hero() {
     return "Good evening";
   })();
 
+  // The entrance, the floating fragments and the blinking caret are all
+  // CSS now (see `.hero-anim` in src/index.css) — nothing here has to run
+  // for the hero to animate, which is the whole point: it starts at first
+  // paint instead of waiting for hydration.
+  //
+  // What is left is the two things CSS cannot do. The floats and caret
+  // loop forever, so they are parked with a class once the section leaves
+  // the viewport rather than left ticking behind the rest of the page.
   useEffect(() => {
-    const words = Array.from(
-      headingRef.current?.querySelectorAll(".hero-word") ?? [],
-    );
-    heroEntrance(
-      {
-        label: labelRef.current,
-        words,
-        sub: subRef.current,
-        buttons: buttonRefs.current,
-      },
-      reduced,
-    );
-
-    // Background loops: paused while the hero is offscreen so mobile
-    // GPUs tick zero animation frames after scrolling past the hero.
-    const caretLoop = blinkCaret(caretRef.current, reduced);
-    const loops: PausableAnimation[] = [
-      ...startFloat(
-        floatRefs.current.filter((el): el is HTMLElement => el !== null),
-        reduced,
-      ),
-      ...(caretLoop ? [caretLoop] : []),
-    ];
-
     const cleanups: (() => void)[] = [];
     const primary = primaryRef.current;
     if (primary) cleanups.push(attachMagnetic(primary));
+
     const section = sectionRef.current;
-    if (section && loops.length > 0 && typeof IntersectionObserver !== "undefined") {
+    if (section && typeof IntersectionObserver !== "undefined") {
       const io = new IntersectionObserver(([entry]) => {
-        for (const loop of loops) {
-          if (entry.isIntersecting) loop.play();
-          else loop.pause();
-        }
+        section.classList.toggle("hero-idle", !entry.isIntersecting);
       });
       io.observe(section);
       cleanups.push(() => io.disconnect());
@@ -142,42 +112,27 @@ export function Hero() {
       />
       <span
         aria-hidden
-        ref={(el) => {
-          floatRefs.current[0] = el;
-        }}
-        className="absolute left-[14%] top-[34%] hidden font-mono text-[11px] text-faint sm:block"
+        className="hero-float hero-float-1 absolute left-[14%] top-[34%] hidden font-mono text-[11px] text-faint sm:block"
       >
         ~/dev $
       </span>
       <span
         aria-hidden
-        ref={(el) => {
-          floatRefs.current[1] = el;
-        }}
-        className="absolute right-[15%] top-[40%] hidden rounded-md border border-line bg-surface/70 px-2 py-1 font-mono text-[10px] text-faint sm:block"
+        className="hero-float hero-float-2 absolute right-[15%] top-[40%] hidden rounded-md border border-line bg-surface/70 px-2 py-1 font-mono text-[10px] text-faint sm:block"
       >
         git push
       </span>
       <span
         aria-hidden
-        ref={(el) => {
-          floatRefs.current[2] = el;
-        }}
-        className="absolute bottom-[30%] left-[24%] hidden h-1.5 w-1.5 rounded-full bg-accent/60 sm:block"
+        className="hero-float hero-float-3 absolute bottom-[30%] left-[24%] hidden h-1.5 w-1.5 rounded-full bg-accent/60 sm:block"
       />
       <span
         aria-hidden
-        ref={(el) => {
-          floatRefs.current[3] = el;
-        }}
-        className="absolute bottom-[36%] right-[26%] hidden h-1 w-1 rounded-full bg-faint sm:block"
+        className="hero-float hero-float-4 absolute bottom-[36%] right-[26%] hidden h-1 w-1 rounded-full bg-faint sm:block"
       />
       <span
         aria-hidden
-        ref={(el) => {
-          floatRefs.current[4] = el;
-        }}
-        className="absolute left-[47%] top-[22%] hidden h-1 w-1 rounded-full bg-accent/40 sm:block"
+        className="hero-float hero-float-5 absolute left-[47%] top-[22%] hidden h-1 w-1 rounded-full bg-accent/40 sm:block"
       />
 
       <div
@@ -185,64 +140,38 @@ export function Hero() {
         // Same trade as Section: 7rem of padding top and bottom pushed
         // the CTAs under the fold on a short phone, so the first thing
         // you saw was a heading with nothing actionable beneath it.
-        className="relative mx-auto max-w-3xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-36"
+        className="hero-anim relative mx-auto max-w-3xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-36"
       >
-        <p
-          ref={labelRef}
-          className={`text-gradient inline-flex items-center font-mono text-xs font-medium uppercase tracking-[0.25em] ${
-            reduced ? "" : "opacity-0"
-          }`}
-        >
+        <p className="hero-label text-gradient inline-flex items-center font-mono text-xs font-medium uppercase tracking-[0.25em]">
           {greeting}, I'm Kmelier
           <span
-            ref={caretRef}
             aria-hidden
-            className="ml-2 inline-block h-[0.85em] w-[2px] translate-y-[1px] bg-accent"
+            className="hero-caret ml-2 inline-block h-[0.85em] w-[2px] translate-y-[1px] bg-accent"
           />
         </p>
-        <h1
-          ref={headingRef}
-          className={`mt-6 text-balance text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl ${
-            reduced ? "" : "pre-words"
-          }`}
-        >
+        <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
           <Tagline />
         </h1>
-        <p
-          ref={subRef}
-          className={`mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted sm:text-lg ${
-            reduced ? "" : "opacity-0"
-          }`}
-        >
+        <p className="hero-sub mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed text-muted sm:text-lg">
           Tech enthusiast interested in building useful, experimental, and
           creative projects.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
-            ref={(el) => {
-              primaryRef.current = el;
-              buttonRefs.current[0] = el;
-            }}
+            ref={primaryRef}
             href="#projects"
             data-spring
-            className={`tap-target group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90 sm:w-auto ${
-              reduced ? "" : "opacity-0"
-            }`}
+            className="hero-cta tap-target group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90 sm:w-auto"
           >
             View Projects
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
           </a>
           <a
-            ref={(el) => {
-              buttonRefs.current[1] = el;
-            }}
             href={profile.social.github}
             target="_blank"
             rel="noreferrer noopener"
             data-spring
-            className={`tap-target inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface/70 px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50 sm:w-auto ${
-              reduced ? "" : "opacity-0"
-            }`}
+            className="hero-cta tap-target inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface/70 px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50 sm:w-auto"
           >
             <GithubIcon className="h-4 w-4" />
             GitHub Profile
