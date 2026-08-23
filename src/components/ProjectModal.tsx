@@ -239,7 +239,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   return createPortal(
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 pb-[env(safe-area-inset-bottom)] backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}
@@ -249,7 +249,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-modal-title"
-        className="supports-[height:100dvh]:max-h-[88dvh] max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-t-2xl border border-line bg-surface p-4 shadow-2xl sm:rounded-2xl sm:p-6 lg:p-8"
+        className="supports-[height:100dvh]:max-h-[88dvh] max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-line bg-surface p-4 shadow-2xl sm:p-6 lg:p-8"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
