@@ -16,4 +16,11 @@
   } catch (e) {
     /* dark stays applied */
   }
+
+  /* Disable browser scroll restoration — refresh starts at the top. */
+  try {
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  } catch (e) {
+    /* default behavior */
+  }
 })();
