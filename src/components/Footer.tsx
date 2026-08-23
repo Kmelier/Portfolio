@@ -1,7 +1,7 @@
 import { ChevronUp, Mail } from "lucide-react";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { profile } from "../config/profile";
-import { ThemeToggleButton } from "./ThemeToggle";
+import { ThemeToggleButton, plainIconButtonClass } from "./ThemeToggle";
 import { GithubIcon } from "./icons";
 
 interface FooterProps {
@@ -24,7 +24,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
             rel="noreferrer noopener"
             aria-label="GitHub profile (opens in a new tab)"
             data-spring
-            className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
+            className={plainIconButtonClass}
           >
             <GithubIcon className="h-4 w-4" />
           </a>
@@ -33,7 +33,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
               href={`mailto:${profile.email}`}
               aria-label="Send an email"
               data-spring
-              className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
+              className={plainIconButtonClass}
             >
               <Mail className="h-4 w-4" />
             </a>
@@ -47,7 +47,7 @@ export function Footer({ theme, onToggleTheme }: FooterProps) {
             href="#home"
             aria-label="Back to top"
             data-spring
-            className="rounded-lg p-2 text-muted transition-colors hover:text-fg"
+            className={plainIconButtonClass}
           >
             <ChevronUp className="h-4 w-4" />
           </a>

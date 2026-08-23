@@ -14,6 +14,7 @@ import { NAV_ITEMS } from "../config/navigation";
 import { profile } from "../config/profile";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScrollLock } from "../hooks/useScrollLock";
 import { modalIn, modalOut } from "../lib/animations";
 import type { Project } from "../lib/github";
 import { GithubIcon } from "./icons";
@@ -44,6 +45,9 @@ export function CommandPalette({
 }: CommandPaletteProps) {
   const reduced = useReducedMotion();
   const [mounted, setMounted] = useState(false);
+  // Held until unmount, not until `open` flips: releasing mid-exit would
+  // unpin the body under a panel that is still fading out.
+  useScrollLock(mounted);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -80,8 +84,6 @@ export function CommandPalette({
     if (!mounted || !open) return;
     modalIn(backdropRef.current, panelRef.current, reduced);
     inputRef.current?.focus();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -99,10 +101,7 @@ export function CommandPalette({
       }
     };
     window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
     // eslint not configured; listeners intentionally follow open state
   }, [mounted, open, onClose, reduced]);
 

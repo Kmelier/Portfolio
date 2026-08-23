@@ -155,20 +155,33 @@ export function blinkCaret(
 /**
  * Delegated springy hover/press for any element carrying `data-spring`.
  * One listener set for the whole document; returns a cleanup fn.
+ *
+ * The hover half is deliberately gated on a real hovering pointer.
+ * Mobile Safari synthesises `mouseover` on tap but never the matching
+ * `mouseout`, so ungated it left every tapped button parked at 1.035 for
+ * the rest of the session. The press half stays on for touch — that is
+ * the feedback a tap actually wants — but releases to 1 rather than to
+ * the hover scale, and listens for `pointercancel` so a tap that turns
+ * into a scroll does not leave the button stuck at 0.96.
+ *
+ * `e.pointerType` rather than a media query, so a hybrid laptop gets the
+ * right behaviour per interaction instead of per device.
  */
 export function attachSpringHover(): () => void {
+  const canHover = () =>
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const springEl = (target: EventTarget | null): HTMLElement | null => {
     if (!(target instanceof Element)) return null;
     return target.closest<HTMLElement>("[data-spring]");
   };
   const onOver = (e: MouseEvent) => {
-    if (prefersReduced()) return;
+    if (prefersReduced() || !canHover()) return;
     const el = springEl(e.target);
     if (!el || el.contains(e.relatedTarget as Node | null)) return;
     animate(el, { scale: 1.035, duration: 450, ease: springHover() });
   };
   const onOut = (e: MouseEvent) => {
-    if (prefersReduced()) return;
+    if (prefersReduced() || !canHover()) return;
     const el = springEl(e.target);
     if (!el || el.contains(e.relatedTarget as Node | null)) return;
     animate(el, { scale: 1, duration: 450, ease: springHover() });
@@ -181,17 +194,21 @@ export function attachSpringHover(): () => void {
   const onUp = (e: PointerEvent) => {
     if (prefersReduced()) return;
     const el = springEl(e.target);
-    if (el) animate(el, { scale: 1.035, duration: 300, ease: springPress() });
+    if (!el) return;
+    const resting = e.pointerType === "mouse" && canHover() ? 1.035 : 1;
+    animate(el, { scale: resting, duration: 300, ease: springPress() });
   };
   document.addEventListener("mouseover", onOver);
   document.addEventListener("mouseout", onOut);
   document.addEventListener("pointerdown", onDown);
   document.addEventListener("pointerup", onUp);
+  document.addEventListener("pointercancel", onUp);
   return () => {
     document.removeEventListener("mouseover", onOver);
     document.removeEventListener("mouseout", onOut);
     document.removeEventListener("pointerdown", onDown);
     document.removeEventListener("pointerup", onUp);
+    document.removeEventListener("pointercancel", onUp);
   };
 }
 
@@ -201,9 +218,20 @@ export function activatePulse(el: HTMLElement, reduced: boolean): void {
   animate(el, { scale: [1.14, 1], duration: 450, ease: springHover() });
 }
 
-/** Card hover lift with spring (replaces the CSS transition lift). */
+/**
+ * Card hover lift with spring (replaces the CSS transition lift).
+ *
+ * Hovering pointers only. React's onMouseEnter is a synthetic mouseenter,
+ * and mobile Safari fires those on tap without a matching leave — so on
+ * touch this left every tapped card lifted 6px and shrunk-scaled for
+ * good. Touch gets a real press state from CSS instead (see `.card-glow`
+ * in src/index.css).
+ */
+function canHoverLift(): boolean {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
 export function cardSpringIn(el: HTMLElement, reduced: boolean): void {
-  if (reduced) return;
+  if (reduced || !canHoverLift()) return;
   animate(el, {
     translateY: -6,
     scale: 1.006,
@@ -212,7 +240,7 @@ export function cardSpringIn(el: HTMLElement, reduced: boolean): void {
   });
 }
 export function cardSpringOut(el: HTMLElement, reduced: boolean): void {
-  if (reduced) return;
+  if (reduced || !canHoverLift()) return;
   animate(el, { translateY: 0, scale: 1, duration: 500, ease: springCard() });
 }
 

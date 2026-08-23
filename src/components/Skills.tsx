@@ -88,7 +88,7 @@ export function Skills() {
                 {category.skills.map((skill) => (
                   <li
                     key={skill}
-                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-elevated px-2.5 py-1 font-mono text-xs text-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:text-fg"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-line bg-elevated px-2.5 py-1 font-mono text-xs text-muted transition-[color,border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:text-fg"
                   >
                     <TechGlyph name={skill} />
                     {skill}

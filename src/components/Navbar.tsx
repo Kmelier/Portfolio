@@ -154,7 +154,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
       duration: 320,
       ease: "outExpo",
     });
-    animate(nav.querySelectorAll("a"), {
+    animate(nav.querySelectorAll("a, button"), {
       opacity: [0, 1],
       translateX: [-12, 0],
       duration: 380,
@@ -218,30 +218,36 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
         </ul>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            data-spring
-            onClick={onOpenPalette}
-            aria-label="Open command palette"
-            aria-keyshortcuts="Control+K"
-            className={`${iconButtonClass} inline-flex items-center gap-2`}
-          >
-            <Search className="h-4 w-4" />
-            <span className="hidden font-mono text-[10px] text-faint md:inline">
-              ⌘K
-            </span>
-          </button>
+          {/* Grouped in one wrapper rather than given `hidden md:inline-flex`
+              each: `hidden` and the `inline-flex` inside iconButtonClass are
+              both display utilities of equal specificity, so which one won
+              would come down to Tailwind's internal sort order. Both live in
+              the mobile sheet instead — four 44px targets do not fit across
+              a 390px header beside the wordmark. */}
+          <div className="hidden items-center gap-2 md:flex">
+            <button
+              type="button"
+              data-spring
+              onClick={onOpenPalette}
+              aria-label="Open command palette"
+              aria-keyshortcuts="Control+K"
+              className={`${iconButtonClass} gap-2`}
+            >
+              <Search className="h-4 w-4" />
+              <span className="font-mono text-[10px] text-faint">⌘K</span>
+            </button>
 
-          <a
-            href={profile.social.github}
-            target="_blank"
-            rel="noreferrer noopener"
-            aria-label="GitHub profile (opens in a new tab)"
-            data-spring
-            className={iconButtonClass}
-          >
-            <GithubIcon className="h-4 w-4" />
-          </a>
+            <a
+              href={profile.social.github}
+              target="_blank"
+              rel="noreferrer noopener"
+              aria-label="GitHub profile (opens in a new tab)"
+              data-spring
+              className={iconButtonClass}
+            >
+              <GithubIcon className="h-4 w-4" />
+            </a>
+          </div>
 
           <ThemeToggleButton theme={theme} onToggleTheme={onToggleTheme} />
 
@@ -252,7 +258,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
             aria-expanded={menuOpen}
             aria-controls="mobile-nav"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="rounded-lg border border-line bg-surface/50 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg md:hidden"
+            className="tap-target inline-flex items-center justify-center rounded-lg border border-line bg-surface/50 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg md:hidden"
           >
             <HamburgerIcon open={menuOpen} />
           </button>
@@ -273,7 +279,7 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
                 <a
                   href={`#${item.id}`}
                   onClick={() => setMenuOpen(false)}
-                  className={`block rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                  className={`tap-target flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors ${
                     active === item.id
                       ? "bg-elevated font-medium text-fg"
                       : "text-muted hover:bg-elevated hover:text-fg"
@@ -283,6 +289,32 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
                 </a>
               </li>
             ))}
+
+            <li className="mt-2 border-t border-line pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onOpenPalette();
+                }}
+                className="tap-target flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-fg"
+              >
+                <Search className="h-4 w-4 shrink-0 text-faint" />
+                Search
+              </button>
+            </li>
+            <li>
+              <a
+                href={profile.social.github}
+                target="_blank"
+                rel="noreferrer noopener"
+                onClick={() => setMenuOpen(false)}
+                className="tap-target flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:bg-elevated hover:text-fg"
+              >
+                <GithubIcon className="h-4 w-4 shrink-0 text-faint" />
+                GitHub profile
+              </a>
+            </li>
           </ul>
         </nav>
       )}

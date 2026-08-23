@@ -36,7 +36,9 @@
   --line: #e3e3ef;
   --fg: #14131f;
   --muted: #4d4b63;
-  --faint: #86839e;
+  /* AA on the strictest background it lands on (--elevated): 4.58.
+     Was #86839e at 3.14, the page's only contrast failure. */
+  --faint: #6b6885;
   --accent: #4f5ee8;
   --accent-2: #7c5ce6;
   --grid-line: rgb(76 87 200 / 0.055);
@@ -53,7 +55,8 @@
   --line: #232329;
   --fg: #f4f4f5;
   --muted: #a1a1aa;
-  --faint: #6d6d76;
+  /* AA on --elevated: 4.70. Was #6d6d76 at 3.49. */
+  --faint: #82828c;
   --accent: #8b9dff;
   --accent-2: #b79dff;
   --grid-line: rgb(255 255 255 / 0.04);
@@ -201,12 +204,52 @@
     box-shadow 0.3s ease;
   box-shadow: var(--shadow-card), var(--inner-highlight);
 }
-.card-glow:hover {
-  border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
-  box-shadow:
-    var(--shadow-card-hover),
-    var(--inner-highlight),
-    0 10px 44px -14px color-mix(in oklab, var(--accent) 22%, transparent);
+/* Gated on a real hovering pointer, unlike every Tailwind `hover:`
+   utility which Tailwind v4 already wraps in `@media (hover: hover)`
+   for us. Ungated, iOS Safari latches :hover onto a tapped card and
+   holds it until you tap something else — so the accent border stayed
+   lit on whichever card you last opened. */
+@media (hover: hover) and (pointer: fine) {
+  .card-glow:hover {
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
+    box-shadow:
+      var(--shadow-card-hover),
+      var(--inner-highlight),
+      0 10px 44px -14px color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+}
+
+/* Touch gets a real press state in place of the hover lift, which Anime.js
+   no longer applies on these devices. `:has(button:active)` is what reaches
+   it: the card's activator is a stretched child button, not the card root,
+   so `group-active` would never match. Transform is safe to transition here
+   precisely because the spring has stepped aside — on a mouse the two would
+   fight over the same property. */
+@media (hover: none), (pointer: coarse) {
+  .card-glow {
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.16s ease-out;
+  }
+  .card-glow:has(button:active) {
+    transform: scale(0.985);
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
+  }
+}
+
+/* ── Touch hit targets (WCAG 2.5.8 / platform HIG: 44px) ───────
+   Absolute pixels, deliberately: the root font-size is fluid, so a
+   rem-based floor would evaluate to 38.5px on the narrowest phones —
+   exactly the width where the floor matters most. Only coarse pointers
+   pay for the extra box, so the desktop layout is byte-identical. The
+   elements that carry this are already inline-flex + centred, so the
+   grown box keeps its glyph in the middle. */
+@media (pointer: coarse) {
+  .tap-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* Inner highlight for small flat tiles */

@@ -222,7 +222,7 @@ export function Hero() {
             }}
             href="#projects"
             data-spring
-            className={`group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90 sm:w-auto ${
+            className={`tap-target group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-fg px-5 py-2.5 text-sm font-medium text-bg transition-opacity hover:opacity-90 sm:w-auto ${
               reduced ? "" : "opacity-0"
             }`}
           >
@@ -237,7 +237,7 @@ export function Hero() {
             target="_blank"
             rel="noreferrer noopener"
             data-spring
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface/70 px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50 sm:w-auto ${
+            className={`tap-target inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface/70 px-5 py-2.5 text-sm font-medium transition-colors hover:border-accent/50 sm:w-auto ${
               reduced ? "" : "opacity-0"
             }`}
           >

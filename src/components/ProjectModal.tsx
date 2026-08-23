@@ -6,6 +6,7 @@ import { fetchReadme, parseReadme, type ReadmeBlock } from "../lib/readme";
 import type { Project } from "../lib/github";
 import { modalIn, modalOut } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
+import { useScrollLock } from "../hooks/useScrollLock";
 import { safeHttpUrl } from "../lib/url";
 import { GithubIcon } from "./icons";
 
@@ -123,6 +124,7 @@ function ReadmeBlockView({ block }: { block: ReadmeBlock }) {
 
 export function ProjectModal({ project, onClose }: ProjectModalProps) {
   const reduced = useReducedMotion();
+  useScrollLock(project !== null);
   const backdropRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -146,8 +148,6 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
     restoreFocusRef.current = document.activeElement as HTMLElement | null;
     modalIn(backdropRef.current, panelRef.current, reduced);
     closeRef.current?.focus();
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -177,10 +177,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
       }
     };
     window.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prevOverflow;
-      window.removeEventListener("keydown", onKey);
-    };
+    return () => window.removeEventListener("keydown", onKey);
     // eslint is not configured; the effect intentionally runs per project
   }, [project?.name]);
 

@@ -92,7 +92,10 @@ export function GithubSection({ github }: { github: GithubData }) {
         sub="Live from the GitHub API — repositories, stats, and what I've been up to."
       />
 
-      <div className="relative mt-14">
+      {/* overflow-hidden, because the two glows below are wider than the
+          column and one is pinned to its right edge — unclipped they gave
+          the whole page ~135px of horizontal scroll at 390px. */}
+      <div className="relative mt-14 overflow-hidden">
         {/* Aurora glows behind the section content */}
         <div
           aria-hidden

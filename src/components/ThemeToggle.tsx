@@ -4,9 +4,15 @@ import { iconPop } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import type { Theme, ThemeOrigin } from "../hooks/useTheme";
 
-/** Shared bordered icon-button classes (toggle + navbar GitHub link). */
+/** Shared bordered icon-button classes (toggle + navbar GitHub link).
+ *  `tap-target` is the 44px touch floor (see src/index.css); inline-flex
+ *  keeps the glyph centred once the box grows past its padding. */
 export const iconButtonClass =
-  "rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg";
+  "tap-target inline-flex items-center justify-center rounded-lg border border-line bg-surface/60 p-2 text-muted transition-colors hover:border-accent/50 hover:text-fg";
+
+/** The footer's borderless variant of the same button. */
+export const plainIconButtonClass =
+  "tap-target inline-flex items-center justify-center rounded-lg p-2 text-muted transition-colors hover:text-fg";
 
 interface ThemeToggleButtonProps {
   theme: Theme;
@@ -44,7 +50,7 @@ export function ThemeToggleButton({
         theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
       }
       aria-pressed={theme === "light"}
-      className={variant === "bordered" ? iconButtonClass : "rounded-lg p-2 text-muted transition-colors hover:text-fg"}
+      className={variant === "bordered" ? iconButtonClass : plainIconButtonClass}
     >
       <span ref={iconRef} className="block">
         {theme === "dark" ? (
