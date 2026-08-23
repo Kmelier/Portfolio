@@ -96,7 +96,11 @@
      surfaces and adds a needless compositing layer in light mode).
      Dropped below 768px: a full-screen fixed layer re-composites on
      every scroll frame, which mid-range mobile GPUs feel as lag —
-     and at 0.05 opacity on a small screen it's imperceptible. */
+     and at 0.05 opacity on a small screen it's imperceptible.
+     The pattern is a real file rather than an inline data: URI
+     because this site serves itself `img-src 'self'`, which blocks
+     data: images — so as a data: URI the grain was silently never
+     painted at all, and logged a CSP error every dark-mode load. */
   html.dark body::after {
     content: "";
     position: fixed;
@@ -104,7 +108,7 @@
     z-index: 100;
     pointer-events: none;
     opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("/noise.svg");
     background-size: 180px 180px;
   }
 
@@ -212,11 +216,17 @@
 
 /* Skip layout/paint for offscreen sections — the browser renders them
    just before they scroll into view. `auto` intrinsic-size means it
-   learns each section's real height after first render, so anchor
-   jumps and the scrollbar stay stable. */
+   learns each section's real height after first render, so the estimate
+   below only has to be good for the very first pass: it is what the
+   scrollbar and any cold-load #anchor jump are computed from.
+   640px is measured, not guessed — the six sections this class covers
+   run 393-1131px tall, averaging 645 at 390px and 602 at 1440px, so one
+   flat value lands within ~6% of the real page height at every width.
+   Per-breakpoint values would be false precision: the spread is between
+   sections, not between viewports. */
 .cv-auto {
   content-visibility: auto;
-  contain-intrinsic-size: auto 900px;
+  contain-intrinsic-size: auto 640px;
 }
 
 /* ── Skeleton shimmer ─────────────────────────────────────────── */

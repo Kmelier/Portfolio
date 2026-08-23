@@ -239,7 +239,11 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   return createPortal(
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-md sm:p-6"
+      // Backdrop blur only from md up. A full-viewport backdrop-filter is
+      // the most expensive thing on the page to composite, and it lands
+      // exactly when the panel is springing in; below md the scrim just
+      // goes deeper and does the separation work on its own.
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:p-6 md:bg-black/40 md:backdrop-blur-md"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}

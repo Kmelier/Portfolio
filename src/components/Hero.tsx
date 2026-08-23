@@ -97,9 +97,15 @@ export function Hero() {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
-  // Scroll parallax: hero content drifts up slower and fades as you leave it
+  // Scroll parallax: hero content drifts up slower and fades as you leave it.
+  // Fine pointers only. On a phone this is a bad trade twice over: it writes
+  // transform + opacity on every scroll frame during the most animation-heavy
+  // moment of the page, and mobile Safari collapses its URL bar mid-scroll,
+  // which changes window.innerHeight underneath the progress maths and makes
+  // the drift visibly stutter even where there is headroom for it.
   useEffect(() => {
     if (reduced) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
     let raf = 0;
     const apply = () => {
       raf = 0;

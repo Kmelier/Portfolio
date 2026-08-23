@@ -165,12 +165,15 @@ export function Navbar({ theme, onToggleTheme, onOpenPalette }: NavbarProps) {
 
   return (
     <header
-      className={`sticky top-0 z-50 border-b transition-all duration-300 ${
+      className={`sticky top-0 z-50 border-b transition-colors duration-300 ${
         scrolled || menuOpen
-          ? // Fully opaque in light — no backdrop-filter layer at all
-            // (dark text smearing behind a blur reads as scroll jank).
-            // Dark keeps its deep translucent blur.
-            "border-line bg-bg dark:bg-bg/80 dark:backdrop-blur-xl"
+          ? // Opaque by default: a sticky backdrop-filter has to re-blur
+            // whatever scrolls under it on every frame, which is the
+            // single worst scroll cost on a phone. Light mode already
+            // avoided it (dark text smears behind a blur); dark now
+            // does too, and only earns the translucent blur back at
+            // md+, where there is GPU headroom for it.
+            "border-line bg-bg md:dark:bg-bg/80 md:dark:backdrop-blur-xl"
           : "border-transparent bg-transparent"
       }`}
     >

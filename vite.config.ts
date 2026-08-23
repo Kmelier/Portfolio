@@ -46,6 +46,13 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   plugins: [react(), tailwindcss(), contentSecurityPolicy()],
   build: {
+    // Never inline a font as a data: URI. This site serves itself a
+    // strict `font-src 'self'`, which blocks data: fonts outright, and
+    // Vite's 4KB default is small enough to catch real subset files.
+    // Returning undefined leaves every other asset type on the default.
+    assetsInlineLimit(filePath: string) {
+      return /\.(woff2?|ttf|otf|eot)$/i.test(filePath) ? false : undefined;
+    },
     rollupOptions: {
       output: {
         // Split framework/libs from app code: config edits re-deploy

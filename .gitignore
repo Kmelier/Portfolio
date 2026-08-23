@@ -5,3 +5,9 @@ dist
 .vercel
 
 .vercel
+
+# Local perf scratch: Lighthouse reports, Chrome profile, throwaway probes.
+# Not just tidiness — Tailwind v4 auto-scans every non-ignored file for
+# class candidates, and a Lighthouse JSON embeds the whole page source,
+# so leaving this visible inflates the production CSS.
+.lh

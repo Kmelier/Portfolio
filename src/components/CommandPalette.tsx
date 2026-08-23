@@ -228,7 +228,9 @@ export function CommandPalette({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/55 p-4 pt-[12vh] backdrop-blur-md sm:p-6"
+      // Blur from md up only — see the note in ProjectModal. A deeper flat
+      // scrim reads the same on a phone and costs nothing per frame.
+      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/80 p-4 pt-[12vh] sm:p-6 md:bg-black/55 md:backdrop-blur-md"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
