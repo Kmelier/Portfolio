@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Home-screen install. The manifest carries the maskable SVG for
+         Android; iOS ignores manifest icons entirely for Add to Home Screen
+         and only reads this PNG, which is rasterised from /icon.svg. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Kmelier" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- Warm up the GitHub API + avatar origins before React asks for them -->

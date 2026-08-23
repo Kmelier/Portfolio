@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- App icon. Full-bleed on purpose: this is declared `any maskable`, so
+       Android may crop it to a circle or a squircle of its choosing. All of
+       the mark sits inside the 80% safe circle (its farthest corner is 161px
+       from the centre against the 205px the spec allows), and the K is drawn
+       as strokes rather than <text> so it cannot be reflowed by whatever
+       font the rasterising device happens to have.
+
+       The gradient is userSpaceOnUse and NOT the default objectBoundingBox:
+       the stem is a pure vertical line, so its bounding box is zero pixels
+       wide, and a bbox-relative paint server on a degenerate box is not
+       rendered at all — the stem silently disappeared and the icon read as
+       a bare chevron. User-space coordinates also mean the stem and the
+       arms share one continuous ramp instead of each re-running it over
+       its own box. -->
+  <defs>
+    <linearGradient
+      id="k"
+      gradientUnits="userSpaceOnUse"
+      x1="170"
+      y1="140"
+      x2="345"
+      y2="375"
+    >
+      <stop offset="0" stop-color="#8b9dff" />
+      <stop offset="1" stop-color="#b79dff" />
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#8b9dff" stop-opacity="0.16" />
+      <stop offset="1" stop-color="#8b9dff" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="#0a0a0c" />
+  <rect width="512" height="512" fill="url(#halo)" />
+  <g
+    stroke="url(#k)"
+    stroke-width="40"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    fill="none"
+  >
+    <path d="M182 146 V366" />
+    <path d="M330 146 L196 256 L338 366" />
+  </g>
+</svg>
