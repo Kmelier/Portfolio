@@ -69,6 +69,7 @@
        capped at 17px on large displays. */
     font-size: clamp(14px, 0.22vw + 12.7px, 17px);
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -86,7 +87,10 @@
   }
 
   /* Faint noise grain — dark theme only (it shimmers over light
-     surfaces and adds a needless compositing layer in light mode) */
+     surfaces and adds a needless compositing layer in light mode).
+     Dropped below 768px: a full-screen fixed layer re-composites on
+     every scroll frame, which mid-range mobile GPUs feel as lag —
+     and at 0.05 opacity on a small screen it's imperceptible. */
   html.dark body::after {
     content: "";
     position: fixed;
@@ -96,6 +100,12 @@
     opacity: 0.05;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 180px 180px;
+  }
+
+  @media (max-width: 767px) {
+    html.dark body::after {
+      content: none;
+    }
   }
 
   section[id] {

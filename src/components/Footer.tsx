@@ -12,7 +12,7 @@ interface FooterProps {
 export function Footer({ theme, onToggleTheme }: FooterProps) {
   return (
     <footer className="border-t border-line">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 sm:flex-row">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:flex-row">
         <p className="text-sm text-faint">
           © {new Date().getFullYear()} Kmelier
         </p>

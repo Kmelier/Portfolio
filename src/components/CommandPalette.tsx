@@ -256,7 +256,7 @@ export function CommandPalette({
             placeholder="Type a command or search…"
             autoComplete="off"
             spellCheck={false}
-            className="w-full bg-transparent text-sm outline-none placeholder:text-faint"
+            className="w-full bg-transparent text-[16px] outline-none placeholder:text-faint sm:text-sm"
           />
           <kbd className="shrink-0 rounded border border-line bg-elevated px-1.5 py-0.5 font-mono text-[10px] text-faint">
             ESC

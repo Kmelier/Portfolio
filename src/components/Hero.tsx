@@ -5,6 +5,7 @@ import {
   blinkCaret,
   heroEntrance,
   startFloat,
+  type PausableAnimation,
 } from "../lib/animations";
 import { useReducedMotion } from "../hooks/useReducedMotion";
 import { profile } from "../config/profile";
@@ -44,6 +45,7 @@ export function Hero() {
   const buttonRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const floatRefs = useRef<(HTMLElement | null)[]>([]);
   const contentRef = useRef<HTMLDivElement | null>(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
 
   // Honest, time-aware greeting from the visitor's clock
   const greeting = (() => {
@@ -66,13 +68,33 @@ export function Hero() {
       },
       reduced,
     );
-    startFloat(
-      floatRefs.current.filter((el): el is HTMLElement => el !== null),
-      reduced,
-    );
-    blinkCaret(caretRef.current, reduced);
+
+    // Background loops: paused while the hero is offscreen so mobile
+    // GPUs tick zero animation frames after scrolling past the hero.
+    const caretLoop = blinkCaret(caretRef.current, reduced);
+    const loops: PausableAnimation[] = [
+      ...startFloat(
+        floatRefs.current.filter((el): el is HTMLElement => el !== null),
+        reduced,
+      ),
+      ...(caretLoop ? [caretLoop] : []),
+    ];
+
+    const cleanups: (() => void)[] = [];
     const primary = primaryRef.current;
-    return primary ? attachMagnetic(primary) : undefined;
+    if (primary) cleanups.push(attachMagnetic(primary));
+    const section = sectionRef.current;
+    if (section && loops.length > 0 && typeof IntersectionObserver !== "undefined") {
+      const io = new IntersectionObserver(([entry]) => {
+        for (const loop of loops) {
+          if (entry.isIntersecting) loop.play();
+          else loop.pause();
+        }
+      });
+      io.observe(section);
+      cleanups.push(() => io.disconnect());
+    }
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   // Scroll parallax: hero content drifts up slower and fades as you leave it
@@ -101,7 +123,7 @@ export function Hero() {
   }, [reduced]);
 
   return (
-    <section id="home" className="relative overflow-hidden">
+    <section id="home" ref={sectionRef} className="relative overflow-hidden">
       {/* Background: faint grid + soft accent glow + floating fragments */}
       <div aria-hidden className="bg-grid absolute inset-0" />
       <div

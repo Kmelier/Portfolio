@@ -239,7 +239,7 @@ export function ProjectModal({ project, onClose }: ProjectModalProps) {
   return createPortal(
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 backdrop-blur-md sm:items-center sm:p-6"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 pb-[env(safe-area-inset-bottom)] backdrop-blur-md sm:items-center sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) requestClose();
       }}

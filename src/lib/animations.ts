@@ -62,10 +62,20 @@ export function heroEntrance(
   }
 }
 
-/** Gentle infinite float for hero background elements. */
-export function startFloat(els: HTMLElement[], reduced: boolean): void {
-  if (reduced) return;
-  els.forEach((el, i) => {
+/** Minimal controls callers need to pause/resume background loops. */
+export interface PausableAnimation {
+  play(): void;
+  pause(): void;
+}
+
+/** Gentle infinite float for hero background elements. Returns the
+ *  loops so the caller can pause them while the hero is offscreen. */
+export function startFloat(
+  els: HTMLElement[],
+  reduced: boolean,
+): PausableAnimation[] {
+  if (reduced) return [];
+  return els.map((el, i) =>
     animate(el, {
       translateY: [0, -(8 + (i % 3) * 4)],
       translateX: i % 2 === 0 ? [0, 6] : [0, -6],
@@ -74,8 +84,8 @@ export function startFloat(els: HTMLElement[], reduced: boolean): void {
       loop: true,
       alternate: true,
       delay: i * 320,
-    });
-  });
+    }),
+  );
 }
 
 /** Fade/slide reveal for section content entering the viewport. */
@@ -127,10 +137,13 @@ export function countUp(
   });
 }
 
-/** Blinking terminal caret (label `_`). */
-export function blinkCaret(el: HTMLElement | null, reduced: boolean): void {
-  if (!el || reduced) return;
-  animate(el, {
+/** Blinking terminal caret (label `_`). Returns the loop, or null. */
+export function blinkCaret(
+  el: HTMLElement | null,
+  reduced: boolean,
+): PausableAnimation | null {
+  if (!el || reduced) return null;
+  return animate(el, {
     opacity: [
       { to: 0, duration: 480, ease: "linear" },
       { to: 1, duration: 480, ease: "linear" },
