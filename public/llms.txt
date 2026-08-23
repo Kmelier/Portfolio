@@ -1,0 +1,42 @@
+# Chris Kmelier — Developer Portfolio
+
+> A single-page developer portfolio for Chris Kmelier (GitHub @Kmelier). Projects,
+> statistics and recent activity are fetched live from the public GitHub REST API at
+> page load rather than hard-coded, so the content reflects the account's current state.
+
+The site is a client-rendered React single-page app with no server component and no
+database. Every section below is an anchor on the one page at https://kmelier.vercel.app,
+not a separate document, so a crawler that fetches the root URL has the whole site.
+Because the project and statistics content arrives from the GitHub API after first paint,
+tools that read only the initial HTML will not see it; read it from the API links below
+instead.
+
+## Pages
+
+- [Home](https://kmelier.vercel.app): the entire site — hero, about, projects, skills, GitHub activity, journey, achievements and contact.
+- [#about](https://kmelier.vercel.app/#about): short biography and profile details.
+- [#projects](https://kmelier.vercel.app/#projects): project cards built from the account's public repositories, with a per-project detail dialog deep-linkable as `#/project/<repo-name>`.
+- [#skills](https://kmelier.vercel.app/#skills): technologies grouped by area, with the language mix derived from repository data.
+- [#github](https://kmelier.vercel.app/#github): profile card, repository and star counts, recent public events, and a twelve-week activity heatmap.
+- [#journey](https://kmelier.vercel.app/#journey): timeline of milestones.
+- [#achievements](https://kmelier.vercel.app/#achievements): aggregate statistics.
+- [#contact](https://kmelier.vercel.app/#contact): email and social links.
+
+## Data sources
+
+- [GitHub profile](https://github.com/Kmelier): the canonical source for everything on the site.
+- [Public user API](https://api.github.com/users/Kmelier): name, bio, followers, public repository count.
+- [Public repositories API](https://api.github.com/users/Kmelier/repos): the exact list the projects grid is built from; the repository named `Portfolio` is filtered out because it is this site.
+- [Public events API](https://api.github.com/users/Kmelier/events/public): the source for the recent-activity list and the heatmap. GitHub retains roughly 90 days here, which is why the heatmap covers twelve weeks and not a full year.
+
+## About this site
+
+- [Source repository](https://github.com/Kmelier/Portfolio): React 19, TypeScript, Vite, Tailwind CSS 4 and Anime.js, deployed on Vercel.
+- [Web app manifest](https://kmelier.vercel.app/manifest.webmanifest): installable to a phone home screen; standalone display, dark theme colour.
+
+## Contact
+
+- [Contact section](https://kmelier.vercel.app/#contact): email and social links. The
+  address is deliberately not spelled out in this file — it is already reachable on the
+  page, and repeating it in a plain-text file written for crawlers only makes it easier
+  to harvest.
