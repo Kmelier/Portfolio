@@ -23,6 +23,7 @@ bun install
 bun run dev       # http://localhost:5173
 bun run build     # typecheck + production build to dist/
 bun run preview   # serve the production build locally
+bun run index.ts    # production server (Bun.serve, dist/ + SPA fallback) — for self-hosting; honors PORT/HOST env
 ```
 
 ## Configuration — everything you edit lives in `src/config/`
