@@ -21,7 +21,7 @@ export function Packet() {
     <a
       href="#home"
       onClick={onPull}
-      aria-label={`${profile.name} — pull to redeploy the sheet`}
+      aria-label={`${profile.name}, pull to redeploy the sheet`}
       className="packet-foil anim-rise d-1 inline-block -rotate-[5deg] rounded-[2px] px-5 py-3.5 transition-transform duration-300 hover:-rotate-[2deg] hover:scale-[1.03]"
     >
       <span className="block font-mono text-[13px] font-bold tracking-[0.22em] text-ink">

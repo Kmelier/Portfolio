@@ -4,47 +4,55 @@ import type { Project } from "../../lib/github";
 import { CreasePin } from "./bits";
 import { Reveal } from "./Reveal";
 
-function FoldCell({ project }: { project: Project }) {
+/** Each card crops a different facet of the paper photograph. */
+const CARD_CROPS = ["18% 22%", "64% 38%", "36% 66%"];
+
+function FoldCell({ project, index }: { project: Project; index: number }) {
   const tech = [project.language, ...project.topics.slice(0, 2)]
     .filter(Boolean)
     .join(" · ");
   const year = new Date(project.pushed_at).getFullYear();
 
   return (
-    <a
-      href={project.html_url}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`${project.name} on GitHub`}
-      className="fold-cell group relative block border border-ink/10 bg-paper px-7 py-7 shadow-fold transition-all duration-300 hover:-translate-y-1 hover:shadow-lift sm:px-9"
-    >
-      <CreasePin className="absolute left-6 top-2.5 -rotate-12" />
-      <CreasePin className="absolute right-3 top-2.5 rotate-12" />
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="font-display text-xl font-bold uppercase tracking-[0.04em] text-ink">
-          {project.name}
-        </h3>
-        <ArrowUpRight
-          aria-hidden="true"
-          className="mt-1 h-4 w-4 shrink-0 text-ink-faint transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-gold-deep"
-        />
-      </div>
-      {project.description && (
-        <p className="mt-2 max-w-md text-[15px] leading-relaxed text-ink-soft">
-          {project.description}
-        </p>
-      )}
-      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] tracking-[0.12em] text-ink-soft">
-        {tech && <span>{tech.toUpperCase()}</span>}
-        {project.stargazers_count > 0 && (
-          <span className="tnum inline-flex items-center gap-1">
-            <Star aria-hidden="true" className="h-3 w-3 fill-gold-deep text-gold-deep" />
-            {project.stargazers_count}
-          </span>
+    <div className="card-lift h-full">
+      <a
+        href={project.html_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${project.name} on GitHub`}
+        style={{ backgroundPosition: CARD_CROPS[index % CARD_CROPS.length] }}
+        className="fold-cell card-photo group relative block h-full px-7 py-7 transition-transform duration-300 sm:px-9"
+      >
+        {/* Legibility wash over the facet photograph. */}
+        <span aria-hidden="true" className="card-wash absolute inset-0" />
+        <CreasePin className="absolute left-6 top-2.5 -rotate-12" />
+        <CreasePin className="absolute right-3 top-2.5 rotate-12" />
+        <div className="relative flex items-start justify-between gap-3">
+          <h3 className="font-display text-xl font-bold uppercase tracking-[0.04em] text-ink">
+            {project.name}
+          </h3>
+          <ArrowUpRight
+            aria-hidden="true"
+            className="mt-1 h-4 w-4 shrink-0 text-ink-faint transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-gold-deep"
+          />
+        </div>
+        {project.description && (
+          <p className="relative mt-2 max-w-md text-[15px] leading-relaxed text-ink-soft">
+            {project.description}
+          </p>
         )}
-        <span className="tnum text-ink-faint">UPDATED {year}</span>
-      </div>
-    </a>
+        <div className="relative mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] tracking-[0.12em] text-ink-soft">
+          {tech && <span>{tech.toUpperCase()}</span>}
+          {project.stargazers_count > 0 && (
+            <span className="tnum inline-flex items-center gap-1">
+              <Star aria-hidden="true" className="h-3 w-3 fill-gold-deep text-gold-deep" />
+              {project.stargazers_count}
+            </span>
+          )}
+          <span className="tnum text-ink-faint">UPDATED {year}</span>
+        </div>
+      </a>
+    </div>
   );
 }
 
@@ -64,7 +72,7 @@ export function ProjectsFold({ projects }: { projects: Project[] }) {
       <Reveal>
         <div className="flex items-baseline justify-between border-b border-ink/15 pb-4">
           <h2 className="font-display text-2xl font-bold tracking-[0.08em] text-ink sm:text-3xl">
-            PROJECTS — SELECTED
+            PROJECTS · SELECTED
           </h2>
           <p className="tnum font-mono text-[10px] tracking-[0.24em] text-ink-faint">
             {selected.length > 0 ? `${selected.length} LIVE` : ""}
@@ -74,9 +82,9 @@ export function ProjectsFold({ projects }: { projects: Project[] }) {
 
       {selected.length > 0 ? (
         <div className="grid gap-6 pt-10 md:grid-cols-3 md:gap-8">
-          {selected.map((project) => (
+          {selected.map((project, i) => (
             <Reveal key={project.name}>
-              <FoldCell project={project} />
+              <FoldCell project={project} index={i} />
             </Reveal>
           ))}
         </div>

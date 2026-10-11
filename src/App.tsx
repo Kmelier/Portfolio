@@ -38,14 +38,21 @@ export default function App() {
         Skip to content
       </a>
       <Sheet />
-      <SiteHeader onOpenPalette={() => setPaletteOpen(true)} />
-      <main id="main" className="relative">
-        <Hero />
-        <LiveStats github={github} />
-        <ProjectsFold projects={projects} />
+      {/* Photo zone: header, hero, stats, and projects ride on the
+          Miura-fold photograph; it melts into flat paper below. */}
+      <div className="relative">
+        <div aria-hidden="true" className="photo-layer" />
+        <SiteHeader onOpenPalette={() => setPaletteOpen(true)} />
+        <main id="main" className="relative">
+          <Hero />
+          <LiveStats github={github} />
+          <ProjectsFold projects={projects} />
+        </main>
+      </div>
+      <div className="relative">
         <ProfileBand />
         <ContactBand />
-      </main>
+      </div>
       <SiteFooter github={github} />
       <CommandPalette
         open={paletteOpen}

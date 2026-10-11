@@ -28,7 +28,7 @@ export function ProfileBand() {
             ABOUT
           </h2>
           <p className="font-mono text-[10px] tracking-[0.24em] text-ink-faint">
-            SPEC — 01
+            SPEC · 01
           </p>
         </div>
       </Reveal>

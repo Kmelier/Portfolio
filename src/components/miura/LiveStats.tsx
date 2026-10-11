@@ -39,7 +39,7 @@ function Stat({
       <p className="font-mono text-[11px] font-medium tracking-[0.28em] text-ink-soft">
         {label}
       </p>
-      <p className="tnum mt-1 font-display text-4xl font-bold text-ink sm:text-5xl">
+      <p className="tnum mt-1 font-display text-5xl font-bold text-ink sm:text-6xl">
         {value}
       </p>
       {sub && (
@@ -92,7 +92,7 @@ export function LiveStats({ github }: { github: GithubData }) {
       aria-label="Live GitHub statistics"
       className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-14 sm:px-10 sm:pt-20"
     >
-      <div className="mx-auto grid max-w-4xl grid-cols-3 gap-6 sm:gap-10">
+      <div className="flex flex-wrap items-start justify-center gap-14 sm:gap-24">
         {stats.map((s, i) => (
           <Stat
             key={s.label}

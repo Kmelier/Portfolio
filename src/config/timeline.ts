@@ -10,7 +10,7 @@ export interface TimelineEntry {
 
 export const timeline: TimelineEntry[] = [
   {
-    period: "2026 — Present",
+    period: "2026 - Present",
     title: "Building & experimenting",
     description:
       "Building projects and experimenting with different technologies.",
