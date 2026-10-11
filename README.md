@@ -19,10 +19,10 @@ React 19 · Vite · TypeScript · Tailwind CSS v4 · Anime.js v4 · Lucide icons
 ## Develop
 
 ```bash
-npm install
-npm run dev       # http://localhost:5173
-npm run build     # typecheck + production build to dist/
-npm run preview   # serve the production build locally
+bun install
+bun run dev       # http://localhost:5173
+bun run build     # typecheck + production build to dist/
+bun run preview   # serve the production build locally
 ```
 
 ## Configuration — everything you edit lives in `src/config/`
@@ -56,4 +56,4 @@ The site is fully static — no backend, no forms, no auth, no secrets in the re
 - **Content-Security-Policy** injected into the production build (`vite.config.ts`): scripts/styles/fonts only from `self`, images additionally from `avatars.githubusercontent.com`, network fetches only to `api.github.com`, no objects, no form submissions, no inline scripts (the theme bootstrap lives in `public/theme-init.js`, and the build fails if an inline `<script>` sneaks in). Dev mode is unaffected — the CSP applies to builds only.
 - **Host headers** (`vercel.json`): `frame-ancestors 'none'` + `X-Frame-Options: DENY` (clickjacking), HSTS with preload, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy` (camera/mic/geo/payment/usb denied), COOP/CORP `same-origin`.
 - **Untrusted-data guards** — everything rendered from the GitHub API is React-escaped text; repo `homepage` URLs pass a `safeHttpUrl()` http(s)-only check before becoming links; the localStorage cache is shape-validated before use; all API fetches have 8s timeouts. All external links use `rel="noreferrer noopener"`.
-- **Supply chain** — `npm audit` clean at time of writing; Dependabot opens weekly dependency PRs (`.github/dependabot.yml`).
+- **Supply chain** — use `bun audit` to check for known vulnerabilities; Dependabot opens weekly dependency PRs (`.github/dependabot.yml`).
