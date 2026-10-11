@@ -11,3 +11,6 @@ dist
 # class candidates, and a Lighthouse JSON embeds the whole page source,
 # so leaving this visible inflates the production CSS.
 .lh
+
+# Impeccable design-workflow scaffolding (comps, review captures)
+.impeccable/

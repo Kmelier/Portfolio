@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -15,10 +15,8 @@
     <link rel="preconnect" href="https://api.github.com" crossorigin />
     <link rel="preconnect" href="https://avatars.githubusercontent.com" />
 
-    <!-- Browser chrome color, kept in sync with the active theme.
-         Hexes mirror the --bg tokens in src/index.css (also see
-         public/theme-init.js and src/hooks/useTheme.ts). -->
-    <meta name="theme-color" content="#0a0a0c" />
+    <!-- Single light sheet: chrome color matches the paper token. -->
+    <meta name="theme-color" content="#f7f5ef" />
 
     <title>Chris Kmelier — Developer Portfolio</title>
     <meta
@@ -34,11 +32,8 @@
       property="og:description"
       content="Tech enthusiast building useful, experimental and creative projects. Projects, skills and GitHub activity, always in sync."
     />
-    <!-- Real 1200x630 social card (public/og.png), not the square GitHub
-         avatar this used to point at: every platform crops a square to
-         its own 1.91:1 card, so the avatar was arriving letterboxed or
-         centre-cropped depending on who unfurled the link. Absolute URL
-         because crawlers do not resolve relative paths here. -->
+    <!-- Real 1200x630 social card (public/og.png). Absolute URL because
+         crawlers do not resolve relative paths here. -->
     <meta property="og:image" content="https://kmelier.vercel.app/og.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -62,10 +57,16 @@
       name="twitter:image:alt"
       content="Chris Kmelier — I build things on the web and beyond. kmelier.vercel.app"
     />
-
-    <script src="/theme-init.js"></script>
   </head>
   <body>
+    <!--
+    THESIS: The portfolio is one deployable sheet. A compact gold packet stub unfolds into a parallelogram field of proof. It refuses the dark-gradient hero and card grid every dev portfolio ships.
+    OWN-WORLD: Matte white sheet, hairline parallelogram crease grid, one gold-foil packet stub, warm-gray mountain and pale-blue valley creases, near-black aerospace-spec type, deep red reserved for LIVE stamps.
+    STORY: The visitor reads the statement riding the main diagonal, sees live GitHub stats pinned at crease intersections, scans projects as fold cells, and reaches contact in one calm scroll.
+    FIRST VIEWPORT: Gold packet stub top-left; statement large along the main diagonal; three LIVE stats pinned mid-sheet; first project cells below the fold line.
+    FORM: Miura-fold deployable sheet, challenger winner of direction round 2, user-approved A+C combination, seed key b8931702.
+    FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

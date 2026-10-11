@@ -1,490 +1,211 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (token swap below does the heavy lifting) */
-@custom-variant dark (&:where(.dark, .dark *));
-
-@theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-elevated: var(--elevated);
-  --color-line: var(--line);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-faint: var(--faint);
-  --color-accent: var(--accent);
-  --color-accent-2: var(--accent-2);
-}
-
 @theme {
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-display: "Saira Semi Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
+  --font-sans: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-paper: #f7f5ef;
+  --color-paper-deep: #edebe1;
+  --color-ink: #1c1c19;
+  --color-ink-soft: #4e4e45;
+  --color-ink-faint: #64645b;
+  --color-crease: #e2e0d3;
+  --color-valley: #d9e6f2;
+  --color-mountain: #8f8f84;
+  --color-gold: #c9a227;
+  --color-gold-deep: #8f7016;
+  --color-live: #b3261e;
+
+  --shadow-fold: 2px 3px 12px rgb(28 28 25 / 0.22);
+  --shadow-lift: 6px 10px 28px rgb(28 28 25 / 0.16);
 }
 
-/* ── Theme tokens: light ("indigo daylight" — tinted neutrals) ── */
-/* Both backgrounds are exposed unconditionally so JS can read either
-   one without repeating the hexes (the theme reveal and the
-   theme-color meta both do). The only other copies are the pre-paint
-   bootstraps that run before this stylesheet applies: index.html
-   (theme-color) and public/theme-init.js — update those together. */
-:root {
-  --bg-light: #f4f4fa;
-  --bg-dark: #0a0a0c;
-
-  --bg: var(--bg-light);
-  --surface: #ffffff;
-  --elevated: #ededf6;
-  --line: #e3e3ef;
-  --fg: #14131f;
-  --muted: #4d4b63;
-  /* AA on the strictest background it lands on (--elevated): 4.58.
-     Was #86839e at 3.14, the page's only contrast failure. */
-  --faint: #6b6885;
-  --accent: #4f5ee8;
-  --accent-2: #7c5ce6;
-  --grid-line: rgb(76 87 200 / 0.055);
-  --shadow-card: 0 1px 2px rgb(76 82 160 / 0.04), 0 8px 24px -16px rgb(76 82 160 / 0.1);
-  --shadow-card-hover: 0 2px 6px rgb(76 82 160 / 0.05), 0 16px 40px -18px rgb(76 82 160 / 0.14);
-  --inner-highlight: inset 0 1px 0 rgb(255 255 255 / 0.85);
+/* ── Base ─────────────────────────────────────────────── */
+html {
+  background: var(--color-paper);
 }
 
-/* ── Theme tokens: dark (default, near-black) ─────────────────── */
-.dark {
-  --bg: var(--bg-dark);
-  --surface: #101014;
-  --elevated: #17171c;
-  --line: #232329;
-  --fg: #f4f4f5;
-  --muted: #a1a1aa;
-  /* AA on --elevated: 4.70. Was #6d6d76 at 3.49. */
-  --faint: #82828c;
-  --accent: #8b9dff;
-  --accent-2: #b79dff;
-  --grid-line: rgb(255 255 255 / 0.04);
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 14px 34px -16px rgb(0 0 0 / 0.55);
-  --shadow-card-hover: 0 2px 8px rgb(0 0 0 / 0.45), 0 24px 52px -18px rgb(0 0 0 / 0.65);
-  --inner-highlight: inset 0 1px 0 rgb(255 255 255 / 0.045);
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  caret-color: var(--color-ink);
 }
 
-@layer base {
-  *,
-  ::before,
-  ::after {
-    border-color: var(--line);
-  }
-
-  html {
-    /* Fluid scale: the whole UI (rem-based sizes + spacing) gently
-       grows with the viewport — 15.5px on phones, 17px from 1440px up.
-       The floor was 14px, under what either platform ships as body text
-       (iOS 17, Android 16) and visibly cramped on a real handset. Every
-       rem-based size and gap in the design scales off this line, which
-       makes it the cheapest possible mobile legibility fix — and the
-       height it costs is paid back by the section-padding trims below,
-       so the page did not get longer. */
-    font-size: clamp(15.5px, 0.143vw + 14.94px, 17px);
-    scroll-behavior: smooth;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-  }
-
-  body {
-    background-color: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-  }
-
-  /* Faint noise grain — dark theme only (it shimmers over light
-     surfaces and adds a needless compositing layer in light mode).
-     Dropped below 768px: a full-screen fixed layer re-composites on
-     every scroll frame, which mid-range mobile GPUs feel as lag —
-     and at 0.05 opacity on a small screen it's imperceptible.
-     The pattern is a real file rather than an inline data: URI
-     because this site serves itself `img-src 'self'`, which blocks
-     data: images — so as a data: URI the grain was silently never
-     painted at all, and logged a CSP error every dark-mode load. */
-  html.dark body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("/noise.svg");
-    background-size: 180px 180px;
-  }
-
-  @media (max-width: 767px) {
-    html.dark body::after {
-      content: none;
-    }
-  }
-
-  section[id] {
-    scroll-margin-top: 4.5rem;
-  }
-
-  ::selection {
-    background: color-mix(in oklab, var(--accent) 30%, transparent);
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
 }
 
-/* Theme switching is animated entirely from JS by src/lib/themeReveal.ts
-   (one composited disc), so there is deliberately no CSS here — no
-   `::view-transition-*` rules and no page-wide property transition. */
-
-/* ── Easings sampled from Anime.js's own solvers ───────────────────
-   Generated once by running the library's `eases.outExpo`,
-   `eases.inOutSine` and `spring({bounce: 0.4, duration: 550})` across
-   the unit interval and printing the results as `linear()` stops, so a
-   CSS animation using them is indistinguishable from the JS one it
-   replaced — including the spring's overshoot to 1.094 at the quarter
-   mark, which no cubic-bezier can express (a bezier easing is bounded
-   by its endpoints; `linear()` is not). Resolution is per-curve: the
-   spring needs 48 stops to keep its bounce smooth, the two monotonic
-   curves are already sub-pixel at 20 and 16. */
-:root {
-  --ease-out-expo: linear(
-    0, 0.2929 5%, 0.5 10%, 0.6464 15%, 0.75 20%, 0.8232 25%, 0.875 30%,
-    0.9116 35%, 0.9375 40%, 0.9558 45%, 0.9688 50%, 0.9779 55%, 0.9844 60%,
-    0.989 65%, 0.9922 70%, 0.9945 75%, 0.9961 80%, 0.9972 85%, 0.998 90%,
-    0.9986 95%, 1
-  );
-  --ease-in-out-sine: linear(
-    0, 0.0096 6.25%, 0.0381 12.5%, 0.0843 18.75%, 0.1464 25%, 0.2222 31.25%,
-    0.3087 37.5%, 0.4025 43.75%, 0.5 50%, 0.5975 56.25%, 0.6913 62.5%,
-    0.7778 68.75%, 0.8536 75%, 0.9157 81.25%, 0.9619 87.5%, 0.9904 93.75%, 1
-  );
-  --ease-spring-words: linear(
-    0, 0.0446 2.0833%, 0.155 4.1667%, 0.3012 6.25%, 0.4594 8.3333%,
-    0.6126 10.4167%, 0.7496 12.5%, 0.864 14.5833%, 0.9534 16.6667%,
-    1.0183 18.75%, 1.061 20.8333%, 1.085 22.9167%, 1.0943 25%, 1.0927 27.0833%,
-    1.0839 29.1667%, 1.0708 31.25%, 1.0559 33.3333%, 1.0411 35.4167%,
-    1.0276 37.5%, 1.016 39.5833%, 1.0068 41.6667%, 1 43.75%, 0.9953 45.8333%,
-    0.9925 47.9167%, 0.9912 50%, 0.9911 52.0833%, 0.9917 54.1667%,
-    0.9929 56.25%, 0.9942 58.3333%, 0.9957 60.4167%, 0.997 62.5%,
-    0.9982 64.5833%, 0.9991 66.6667%, 0.9998 68.75%, 1.0003 70.8333%,
-    1.0006 72.9167%, 1.0008 75%, 1.0009 77.0833%, 1.0008 79.1667%,
-    1.0007 81.25%, 1.0006 83.3333%, 1.0005 85.4167%, 1.0003 87.5%,
-    1.0002 89.5833%, 1.0001 91.6667%, 1 93.75%, 1 95.8333%, 0.9999 97.9167%, 1
-  );
+/* Scrollbar carries the design: thin, warm gray on paper. */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: #c9c7b8;
+  border: 3px solid var(--color-paper);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mountain);
 }
 
-/* ── Hero entrance, floats and caret ───────────────────────────────
-   These used to be Anime.js animations kicked off from Hero's mount
-   effect, which had two costs. The cheap one: 39 kB of animation engine
-   on the critical path. The expensive one: every element here shipped
-   with `opacity: 0` and was only revealed once React had hydrated, so
-   the hero was a blank box until the main thread finished the busiest
-   moment of the page — hydration plus the first GitHub fetch — and then
-   the entrance itself was driven frame-by-frame from JS, competing with
-   that same work. On a mid-range phone that is exactly where the "laggy"
-   feeling came from.
-
-   As CSS the whole sequence starts at first paint with no JS at all and
-   runs on the compositor. The timings and easings are not re-invented:
-   the `linear()` curves below are sampled from Anime.js's own solvers
-   (`eases.outExpo`, `eases.inOutSine`, and `spring({bounce: .4,
-   duration: 550})`), and the delays are the resolved absolute times of
-   the old timeline — so the choreography is unchanged, frame for frame.
-
-   Why 1340ms for the words: a spring easing overrides whatever duration
-   you hand the animation with its own settling time, so the old
-   `duration: 700` was never in effect. The visible motion is over by
-   ~600ms; the rest is the tail settling within a thousandth of 1.
-
-   `animation-fill-mode: backwards` and not `forwards`, deliberately:
-   backwards holds the hidden `from` state through the delay, then hands
-   the properties back to the base styles once the run ends. Forwards
-   would leave the animation pinned at its end frame, and the animation
-   origin outranks inline styles in the cascade — the magnetic-cursor
-   effect writes `transform` on the primary CTA and would have been
-   silently ignored for the rest of the session. Movement uses the
-   standalone `translate` property for the same reason: it cannot
-   collide with anything writing `transform`. */
-@media (prefers-reduced-motion: no-preference) {
-  .hero-anim :is(.hero-label, .hero-sub, .hero-cta, .hero-word) {
-    animation-name: hero-in;
-    animation-fill-mode: backwards;
-    animation-timing-function: var(--ease-out-expo);
-  }
-
-  .hero-anim .hero-label {
-    --hero-rise: 14px;
-    animation-duration: 900ms;
-    animation-delay: 100ms;
-  }
-  .hero-anim .hero-sub {
-    --hero-rise: 18px;
-    animation-duration: 900ms;
-    animation-delay: 550ms;
-  }
-  .hero-anim .hero-cta {
-    --hero-rise: 12px;
-    animation-duration: 900ms;
-    animation-delay: 850ms;
-  }
-  .hero-anim .hero-cta:nth-of-type(2) {
-    animation-delay: 960ms;
-  }
-
-  /* Word stagger: 350ms lead-in, then 65ms apart. Written out rather
-     than derived, because the heading is built from config and CSS has
-     no way to count what it is handed. Twelve covers the tagline with
-     room to spare; a thirteenth word would simply share the last delay,
-     which is a stagger that stops widening — not a broken animation. */
-  .hero-anim .hero-word {
-    --hero-rise: 32px;
-    animation-duration: 1340ms;
-    animation-timing-function: var(--ease-spring-words);
-    animation-delay: 350ms;
-  }
-  .hero-anim span:nth-child(2) .hero-word { animation-delay: 415ms; }
-  .hero-anim span:nth-child(3) .hero-word { animation-delay: 480ms; }
-  .hero-anim span:nth-child(4) .hero-word { animation-delay: 545ms; }
-  .hero-anim span:nth-child(5) .hero-word { animation-delay: 610ms; }
-  .hero-anim span:nth-child(6) .hero-word { animation-delay: 675ms; }
-  .hero-anim span:nth-child(7) .hero-word { animation-delay: 740ms; }
-  .hero-anim span:nth-child(8) .hero-word { animation-delay: 805ms; }
-  .hero-anim span:nth-child(9) .hero-word { animation-delay: 870ms; }
-  .hero-anim span:nth-child(10) .hero-word { animation-delay: 935ms; }
-  .hero-anim span:nth-child(11) .hero-word { animation-delay: 1000ms; }
-  .hero-anim span:nth-child(n + 12) .hero-word { animation-delay: 1065ms; }
-
-  /* Background fragments and the terminal caret: infinite loops, so
-     they are the one thing here that keeps costing something after the
-     entrance. Hero's IntersectionObserver adds `hero-idle` once the
-     section leaves the viewport, which parks them rather than leaving
-     the compositor ticking six animations behind the rest of the page. */
-  .hero-float {
-    animation-name: hero-float;
-    animation-timing-function: var(--ease-in-out-sine);
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-  }
-  .hero-float-1 { --fx: 6px;  --fy: -8px;  animation-duration: 2800ms; }
-  .hero-float-2 { --fx: -6px; --fy: -12px; animation-duration: 3250ms; animation-delay: 320ms; }
-  .hero-float-3 { --fx: 6px;  --fy: -16px; animation-duration: 3700ms; animation-delay: 640ms; }
-  .hero-float-4 { --fx: -6px; --fy: -8px;  animation-duration: 4150ms; animation-delay: 960ms; }
-  .hero-float-5 { --fx: 6px;  --fy: -12px; animation-duration: 4600ms; animation-delay: 1280ms; }
-
-  .hero-caret {
-    animation: hero-caret 960ms linear infinite;
-  }
-
-  .hero-idle :is(.hero-float, .hero-caret) {
-    animation-play-state: paused;
-  }
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
-@keyframes hero-in {
-  from {
-    opacity: 0;
-    translate: 0 var(--hero-rise, 16px);
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
-@keyframes hero-float {
-  from {
-    translate: 0 0;
-  }
-  to {
-    translate: var(--fx) var(--fy);
-  }
-}
-
-@keyframes hero-caret {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-
-.hero-word {
-  display: inline-block;
-}
-
-/* Active-nav-link indicator. `left` and `width` are layout properties,
-   so this transition is not free — but it replaces a JS tween of the
-   same two properties, which paid the same layout cost plus a
-   main-thread tick per frame. Opacity is faster than the slide on
-   purpose: it only ever runs when there is no active section to point
-   at, and a 400ms fade on a 2px bar reads as a hang. */
-@media (prefers-reduced-motion: no-preference) {
-  .nav-indicator {
-    transition:
-      left 400ms var(--ease-out-expo),
-      width 400ms var(--ease-out-expo),
-      opacity 200ms var(--ease-out-expo);
-  }
-}
-
-/* ── Faint technical grid background ──────────────────────────── */
-.bg-grid {
+/* ── The sheet: fixed parallelogram crease grid ────────── */
+.crease-grid {
   background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 32%, black 25%, transparent 78%);
-  mask-image: radial-gradient(ellipse 85% 65% at 50% 32%, black 25%, transparent 78%);
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 148px,
+      rgb(28 28 25 / 0.055) 148px 149px
+    ),
+    repeating-linear-gradient(
+      65deg,
+      transparent 0 148px,
+      rgb(28 28 25 / 0.055) 148px 149px
+    );
 }
 
-/* ── Aurora glows ───────────────────────────────────────────────
-   Radial gradients instead of blurred divs: same soft look, but no
-   filter: blur() GPU cost (the most expensive paint on the page). */
-.glow-accent {
-  background: radial-gradient(
-    closest-side,
-    color-mix(in oklab, var(--accent) 13%, transparent),
-    transparent 72%
-  );
-}
-.glow-accent-2 {
-  background: radial-gradient(
-    closest-side,
-    color-mix(in oklab, var(--accent-2) 10%, transparent),
-    transparent 72%
-  );
-}
-
-/* ── Gradient accent text (indigo → violet) ───────────────────── */
-.text-gradient {
-  background: linear-gradient(120deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* ── Gradient border for the featured project card ────────────── */
-.gradient-border {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--accent) 55%, transparent),
-      color-mix(in oklab, var(--accent-2) 45%, transparent)
-    ) border-box;
-}
-
-/* ── Cards: resting shadow + inner top highlight, deeper on hover ──
-   Transform is deliberately NOT transitioned — card hover movement is
-   spring-driven by Anime.js (see cardSpringIn/cardSpringOut). */
-.card-glow {
-  transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
-  box-shadow: var(--shadow-card), var(--inner-highlight);
-}
-/* Gated on a real hovering pointer, unlike every Tailwind `hover:`
-   utility which Tailwind v4 already wraps in `@media (hover: hover)`
-   for us. Ungated, iOS Safari latches :hover onto a tapped card and
-   holds it until you tap something else — so the accent border stayed
-   lit on whichever card you last opened. */
-@media (hover: hover) and (pointer: fine) {
-  .card-glow:hover {
-    border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
-    box-shadow:
-      var(--shadow-card-hover),
-      var(--inner-highlight),
-      0 10px 44px -14px color-mix(in oklab, var(--accent) 22%, transparent);
+@media (max-width: 640px) {
+  .crease-grid {
+    background-image:
+      repeating-linear-gradient(
+        115deg,
+        transparent 0 96px,
+        rgb(28 28 25 / 0.05) 96px 97px
+      ),
+      repeating-linear-gradient(
+        65deg,
+        transparent 0 96px,
+        rgb(28 28 25 / 0.05) 96px 97px
+      );
   }
 }
 
-/* Touch gets a real press state in place of the hover lift, which Anime.js
-   no longer applies on these devices. `:has(button:active)` is what reaches
-   it: the card's activator is a stretched child button, not the card root,
-   so `group-active` would never match. Transform is safe to transition here
-   precisely because the spring has stepped aside — on a mouse the two would
-   fight over the same property. */
-@media (hover: none), (pointer: coarse) {
-  .card-glow {
-    transition:
-      border-color 0.3s ease,
-      box-shadow 0.3s ease,
-      transform 0.16s ease-out;
-  }
-  .card-glow:has(button:active) {
-    transform: scale(0.985);
-    border-color: color-mix(in oklab, var(--accent) 45%, var(--line));
-  }
-}
-
-/* ── Touch hit targets (WCAG 2.5.8 / platform HIG: 44px) ───────
-   Absolute pixels, deliberately: the root font-size is fluid, so a
-   rem-based floor would evaluate to 38.5px on the narrowest phones —
-   exactly the width where the floor matters most. Only coarse pointers
-   pay for the extra box, so the desktop layout is byte-identical. The
-   elements that carry this are already inline-flex + centred, so the
-   grown box keeps its glyph in the middle. */
-@media (pointer: coarse) {
-  .tap-target {
-    min-width: 44px;
-    min-height: 44px;
-  }
-}
-
-/* Inner highlight for small flat tiles */
-.tile {
-  box-shadow: var(--inner-highlight);
-}
-
-/* Skip layout/paint for offscreen sections — the browser renders them
-   just before they scroll into view. `auto` intrinsic-size means it
-   learns each section's real height after first render, so the estimate
-   below only has to be good for the very first pass: it is what the
-   scrollbar and any cold-load #anchor jump are computed from.
-   660px is measured, not guessed — re-measured after the type and
-   padding changes, the six sections this class covers now run 373-1227px
-   tall, averaging 666 at 390px and 643 at 1440px, so one flat value
-   lands within ~3% of the real page height at both widths.
-   Per-breakpoint values would be false precision: the spread is between
-   sections (#github is twice #journey) and not between viewports. */
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 660px;
-}
-
-/* ── Skeleton shimmer ─────────────────────────────────────────── */
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--elevated);
-  border-radius: 8px;
-}
-.skeleton::after {
+/* Paper grain: the public/noise.svg turbulence tile, barely there.
+   Absolute (not fixed) so the finish ends with the sheet at the footer. */
+.grain::after {
   content: "";
   position: absolute;
   inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--fg) 7%, transparent), transparent);
-  animation: shimmer 1.6s infinite;
+  z-index: 60;
+  pointer-events: none;
+  background-image: url("/noise.svg");
+  background-size: 180px 180px;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
 }
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
+
+/* ── Hero fold shade ────────────────────────────────────
+   One quiet directional wash on the focal fold so it reads as folded
+   paper catching light. Flat wash, consistent with the valley fields
+   elsewhere — no texture noise, no heavy shadow. */
+.hero-shade {
+  background: linear-gradient(
+    115deg,
+    rgb(255 255 255 / 0.6) 0%,
+    rgb(255 255 255 / 0) 45%,
+    rgb(28 28 25 / 0.055) 100%
+  );
+  clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
+}
+
+/* ── Gold foil packet ─────────────────────────────────── */
+.packet-foil {
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.55) 0%, transparent 28%),
+    linear-gradient(135deg, #e6c968 0%, #c9a227 38%, #9c7d1a 68%, #d9b64a 100%);
+  box-shadow:
+    2px 3px 10px rgb(28 28 25 / 0.28),
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -1px 0 rgb(0 0 0 / 0.18);
+}
+
+/* ── LIVE stamp: deep red is reserved for these ────────── */
+.live-stamp {
+  color: var(--color-live);
+  border: 1px solid rgb(179 38 30 / 0.45);
+  box-shadow: inset 0 0 0 1px rgb(179 38 30 / 0.08);
+}
+
+/* ── Fold cells: parallelogram via clip-path ───────────── */
+.fold-cell {
+  clip-path: polygon(7% 0, 100% 0, 93% 100%, 0 100%);
+}
+@media (max-width: 640px) {
+  .fold-cell {
+    clip-path: none;
+    border-radius: 3px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
-    animation: none;
+
+/* ── The unfold: one authored moment ────────────────────
+   Exponential ease-out from an already-visible default.
+   Everything below is inert under prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
+
+  @keyframes sheet-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes hero-wipe {
+    from { clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%); }
+    to { clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%); }
+  }
+  @keyframes pin-in {
+    0% { opacity: 0; transform: translateY(-14px) scale(0.6); }
+    60% { opacity: 1; transform: translateY(2px) scale(1.06); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim-sheet { animation: sheet-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .anim-hero { animation: hero-wipe 1100ms cubic-bezier(0.22, 1, 0.36, 1) 150ms both; }
+  .anim-rise { animation: rise-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .anim-pin { animation: pin-in 600ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger helpers (delay only; harmless without motion) */
+.d-1 { animation-delay: 250ms; }
+.d-2 { animation-delay: 380ms; }
+.d-3 { animation-delay: 510ms; }
+.d-4 { animation-delay: 640ms; }
+.d-5 { animation-delay: 770ms; }
+
+/* Numerals in tabular data ride tabular figures. */
+.tnum {
+  font-variant-numeric: tabular-nums;
 }

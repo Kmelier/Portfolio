@@ -1,44 +1,19 @@
 import { useEffect, useState } from "react";
-import { useTheme } from "./hooks/useTheme";
 import { useGithubData } from "./hooks/useGithubData";
-import { useEasterEgg } from "./hooks/useEasterEgg";
-import { attachSpringHover, warmAnimations } from "./lib/animations";
 import { organizeProjects } from "./lib/github";
-import { Navbar } from "./components/Navbar";
-import { Hero } from "./components/Hero";
-import { About } from "./components/About";
-import { Projects } from "./components/Projects";
-import { Skills } from "./components/Skills";
-import { GithubSection } from "./components/GithubSection";
-import { Timeline } from "./components/Timeline";
-import { Achievements } from "./components/Achievements";
-import { Contact } from "./components/Contact";
-import { Footer } from "./components/Footer";
-import { CommandPalette } from "./components/CommandPalette";
+import { Sheet } from "./components/miura/Sheet";
+import { SiteHeader } from "./components/miura/SiteHeader";
+import { Hero } from "./components/miura/Hero";
+import { LiveStats } from "./components/miura/LiveStats";
+import { ProfileBand } from "./components/miura/ProfileBand";
+import { ProjectsFold } from "./components/miura/ProjectsFold";
+import { ContactBand } from "./components/miura/ContactBand";
+import { SiteFooter } from "./components/miura/SiteFooter";
+import { CommandPalette } from "./components/miura/CommandPalette";
 
 export default function App() {
-  const { theme, toggle } = useTheme();
   const github = useGithubData();
   const [paletteOpen, setPaletteOpen] = useState(false);
-  useEasterEgg();
-
-  // One delegated listener set powers every [data-spring] control
-  useEffect(() => attachSpringHover(), []);
-
-  // Anime.js is a lazy chunk (see src/lib/animations.ts) — pulled in here
-  // once the browser is idle, so it is warm before the first hover, tap or
-  // scroll-reveal needs it without ever competing with hydration or the
-  // GitHub fetch for the main thread. `requestIdleCallback` is still
-  // missing on Safari before 17.4, hence the timeout fallback.
-  useEffect(() => {
-    const idle = window.requestIdleCallback;
-    if (idle) {
-      const handle = idle(() => warmAnimations(), { timeout: 2500 });
-      return () => window.cancelIdleCallback?.(handle);
-    }
-    const t = window.setTimeout(warmAnimations, 1200);
-    return () => window.clearTimeout(t);
-  }, []);
 
   // ⌘K / Ctrl+K toggles the command palette
   useEffect(() => {
@@ -55,36 +30,28 @@ export default function App() {
   const projects = github.data ? organizeProjects(github.data.repos) : [];
 
   return (
-    <>
+    <div className="grain relative">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:border focus:border-line focus:bg-surface focus:px-4 focus:py-2 focus:text-sm"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-[3px] focus:border focus:border-ink focus:bg-paper focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:text-ink"
       >
         Skip to content
       </a>
-      <Navbar
-        theme={theme}
-        onToggleTheme={toggle}
-        onOpenPalette={() => setPaletteOpen(true)}
-      />
-      <main id="main">
+      <Sheet />
+      <SiteHeader onOpenPalette={() => setPaletteOpen(true)} />
+      <main id="main" className="relative">
         <Hero />
-        <About />
-        <Projects github={github} />
-        <Skills />
-        <GithubSection github={github} />
-        <Timeline />
-        <Achievements github={github} />
-        <Contact />
+        <LiveStats github={github} />
+        <ProjectsFold projects={projects} />
+        <ProfileBand />
+        <ContactBand />
       </main>
-      <Footer theme={theme} onToggleTheme={toggle} />
+      <SiteFooter github={github} />
       <CommandPalette
         open={paletteOpen}
         onClose={() => setPaletteOpen(false)}
         projects={projects}
-        theme={theme}
-        onToggleTheme={toggle}
       />
-    </>
+    </div>
   );
 }
